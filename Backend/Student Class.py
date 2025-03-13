@@ -26,3 +26,4 @@ class Student:
 Dominik = Student(232487, "Dominik Allen", "Public Policy", 2)
 
 print(Dominik)
+
