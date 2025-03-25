@@ -1,4 +1,4 @@
-class Course:
+class Courses:
     def __init__(self, course_id, name, program_id, program_name, credits, capacity, time_slots, faculty, prerequisites=None):
         # Basic validation
         if not isinstance(capacity, int) or capacity <= 0:
