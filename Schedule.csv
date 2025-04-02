@@ -1,0 +1,23 @@
+Program_id,Program ,Course_ID,Course,Type,Day,Time
+1,MDS,1,Machine_Learning_Monday_8-10_AM,Core,Monday,8-10_AM
+1,MDS,2,Data_Structures_and_Algorithm_Tuesday_4-6_PM,Core,Tuesday,4-6_PM
+1,MDS,3,Database_Management_Tuesday_12-2_PM,Elective,Tuesday,12-2_PM
+1,MDS,4,Law_and_Governance_Monday_2-4_PM,Elective,Monday,2-4_PM
+1,MDS,5,Machine_Learning_Lab_1_Thursday_10-12_PM,Lab,Thursday,10-12_PM
+1,MDS,6,Machine_Learning_Lab_2_Friday_2-4_PM,Lab,Friday,2-4_PM
+1,MDS,7,Data_Structures_and_Algorithm_Lab_1_Wednesday_4-6_PM,Lab,Wednesday,4-6_PM
+1,MDS,8,Data_Structures_and_Algorithm_Lab_1_Thursday_4-6_PM,Lab,Thursday,4-6_PM
+2,MPP,9,Stastitics_2_Monday_10-12_PM,Core,Monday,10-12_PM
+2,MPP,10,Economics_2_Wednesday_12-2_PM,Core,Wednesday,12-2_PM
+2,MPP,4,Law_and_Governance_Monday_2-4_PM,Elective,Monday,2-4_PM
+2,MPP,11,Stastitics_2_Lab_1_Tuesday_10-12_PM,Lab,Tuesday,10-12_PM
+2,MPP,12,Global_Ethics_Tuesday_6-8_PM,Elective,Tuesday,6-8_PM
+2,MPP,13,Stastitics_2_Lab_2_Wednesday_2-4_PM,Lab,Wednesday,2-4_PM
+2,MPP,14,Economics_2_Lab_1_Thursday_12-2_PM,Lab,Thursday,12-2_PM
+2,MPP,15,Economics_2_Lab_1_Friday_12-2_PM,Lab,Friday,12-2_PM
+3,MIA,16,Statistics_2_Tuesday_10-12_PM,Core,Tuesday,10-12_PM
+3,MIA,17,International_Diplomacy_Monday_4-6_PM,Core,Monday,4-6_PM
+3,MIA,18,Stastitics_2_Lab_1_Friday_10-12_PM,Lab,Friday,10-12_PM
+3,MIA,19,Stastitics_2_Lab_2_Thursday_2-4_PM,Lab,Thursday,2-4_PM
+3,MIA,12,Global_Ethics_Tuesday_6-8_PM,Elective,Tuesday,6-8_PM
+3,MIA,20,UN_Structure_Wednesday_12-2_PM,Elective,Wednesday,12-2_PM
