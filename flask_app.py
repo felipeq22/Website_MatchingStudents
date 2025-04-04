@@ -12,9 +12,13 @@ import webbrowser
 app = Flask(__name__)
 
 @app.route("/")
-@app.route("/home", methods=['GET', 'POST'])
+@app.route("/home")
 def home():
     return render_template("home.html")
+
+@app.route('/student_demo')
+def student_demo():
+    return render_template('student_demo.html')
 
 @app.route('/course_assignation', methods=['GET', 'POST'])
 def course_assignation():
@@ -36,8 +40,7 @@ def open_browser():
 def run_app():
     app.run(debug=False, use_reloader=False)
 
-if __name__ == "__main__":
-        
+if __name__ == "__main__":  
     app.run(debug=True)
 #    threading.Thread(target=run_app).start()
 #    open_browser()
