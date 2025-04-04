@@ -1,7 +1,7 @@
 #Created libraries
-from algorithm import StudentCourseMatchingAlgorithm
-from courses import Courses
-from students import Student
+#from algorithm import StudentCourseMatchingAlgorithm
+#from courses import Courses
+#from students import Student
 
 #Helper libraries
 from flask import Flask, render_template
