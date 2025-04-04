@@ -67,8 +67,33 @@
 
     <main>
         <img src="static/images/logo.png" alt="Logo" class="logo">
-        <h1>Data Structures & Algorithms 2025</h1>
-        <h2>Matching Project</h2>
+        <h1>Course Assignation</h1>
+        <h2>Assign Students to Classes</h2>
+        <div class="form-container">
+            <form action="/assign" method="POST">
+                <label for="student_id">Student ID:</label>
+                <input type="text" id="student_id" name="student_id" placeholder="Enter your user ID" required>
+
+                <label for="program">Select Program:</label>
+                <select id="program" name="program">
+                    <option value="mpp">MPP</option>
+                    <option value="mds">MDS</option>
+                    <option value="mia">MIA</option>
+                </select>
+
+                <label for="student">Student Name:</label>
+                <input type="text" id="student" name="student" placeholder="Enter student name" required>
+
+                <label for="course">Select Course:</label>
+                <select id="course" name="course">
+                    <option value="data_structures">Data Structures</option>
+                    <option value="algorithms">Algorithms</option>
+                    <option value="advanced_algorithms">Advanced Algorithms</option>
+                </select>
+
+                <button type="submit">Assign</button>
+            </form>
+        </div>
     </main>
 
     <footer>
