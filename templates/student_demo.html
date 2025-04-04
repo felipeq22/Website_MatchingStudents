@@ -1,11 +1,169 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Student Demo</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Structures & Algorithms 2025</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        h1 {
+            color: #333;
+        }
+        h2 {
+            color: #555;
+        }
+        p {
+            margin: 10px 0;
+            color: #333;
+        }
+        .logo {
+            width: 150px; 
+            height: auto;
+            margin-bottom: 20px;
+        }
+        nav {
+            background-color: #ba0020;
+            padding: 10px;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 14px 20px;
+            display: inline-block;
+        }
+        nav a:hover {
+            background-color: #575757;
+            border-radius: 5px;
+        }
+        main {
+           margin-top: 50px;
+        }
+        .text-section, .dropdown-section {
+            margin: 20px auto;
+            padding: 20px;
+            max-width: 600px;
+            text-align: left;
+            background-color: #f8f8f8;
+            border-radius: 10px;
+            box-shadow: 0px 2px 5px rgba(0,0,0,0.2);
+        }
+        label, select, textarea {
+            font-size: 1em;
+            margin: 5px 0;
+            padding: 8px;
+            width: 100%;
+            max-width: 100%;
+            margin-bottom: 10px;
+        }
+        select {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #ba0020;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #900015;
+        }
+        footer {
+            margin-top: 50px;
+            font-size: 0.8em;
+            color: #555;
+            padding: 10px;
+        }
+        footer h3 {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+        footer p {
+            font-size: 1em;
+            color: #555;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to the Student Demo Page</h1>
-    <p>This is the demo page for student information.</p>
-    <a href="home.html">Back to Home</a>
+
+    <nav>
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('students') }}">How It Works</a>
+        <a href="{{ url_for('student_demo') }}">Try It!</a>
+    </nav>
+
+    <main>
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+        <h1>Data Structures & Algorithms 2025</h1>
+        <h2>Matching Project</h2>
+    </main>
+
+    <div class="text-section">
+        <h1>Welcome to the Student Demo Page</h1>
+        <p>This is the demo page for student information. Below, you can select your program and preferences.</p>
+    </div>
+
+    <div class="dropdown-section">
+        <h2>Select Your Program</h2>
+        <label for="program">Program:</label>
+        <select id="program" name="program">
+            <option value="mpp">MPP</option>
+            <option value="mds">MDS</option>
+            <option value="mia">MIA</option>
+        </select>
+        
+        <h2>Select Your Preferences</h2>
+        <label for="pref1">Preference 1:</label>
+        <select id="pref1" name="pref1">
+            <option value="pref1">Preference 1</option>
+            <option value="pref2">Preference 2</option>
+            <option value="pref3">Preference 3</option>
+            <option value="pref4">Preference 4</option>
+        </select>
+
+        <label for="pref2">Preference 2:</label>
+        <select id="pref2" name="pref2">
+            <option value="pref1">Preference 1</option>
+            <option value="pref2">Preference 2</option>
+            <option value="pref3">Preference 3</option>
+            <option value="pref4">Preference 4</option>
+        </select>
+
+        <label for="pref3">Preference 3:</label>
+        <select id="pref3" name="pref3">
+            <option value="pref1">Preference 1</option>
+            <option value="pref2">Preference 2</option>
+            <option value="pref3">Preference 3</option>
+            <option value="pref4">Preference 4</option>
+        </select>
+
+        <label for="pref4">Preference 4:</label>
+        <select id="pref4" name="pref4">
+            <option value="pref1">Preference 1</option>
+            <option value="pref2">Preference 2</option>
+            <option value="pref3">Preference 3</option>
+            <option value="pref4">Preference 4</option>
+        </select>
+
+        <button type="submit">Submit</button>
+    </div>
+
+    <div class="text-section">
+        <p>Feel free to update your preferences as needed. Click "Submit" when you are ready.</p>
+    </div>
+
+    <footer>
+        <h3>Developers</h3>
+        <p>Elena Murray, Aditii Joshi, Dominik Allen, Corbin Cerny, Saurav Jha, Juan Quinones</p>
+    </footer>
+
 </body>
 </html>
