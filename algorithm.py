@@ -759,9 +759,9 @@ def run_test(num_students=15, lab_capacity=3):
     )
     
     print("\nCourse Assignment Results:")
-    print(results_df.to_string())
+    html_table = results_df.to_html(classes="table table-bordered", index=False)
     
-    return results_df, assignments, stats, data
+    return html_table, assignments, stats, data
 
 if __name__ == "__main__":
     # Run with 15 students and lab capacity of 3
