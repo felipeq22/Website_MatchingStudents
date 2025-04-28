@@ -1,0 +1,16 @@
+course_id,course_name,id_day,start_time,end_time 
+1,Machine Learning,1,08:00:00,10:00:00
+2,Data structure and algorithm,2,16:00:00,18:00:00
+3,Deep learning,2,12:00:00,14:00:00
+4,Natural Language Processing ,3,08:00:00,10:00:00
+5,Law and Governance,1,14:00:00,16:00:00
+6,Statistics 2 ,1,08:00:00,10:00:00
+7,Economics 2,2,16:00:00,18:00:00
+8,Global Ethics ,2,12:00:00,14:00:00
+9,Development Economics,3,08:00:00,10:00:00
+10,Law and Governance,1,14:00:00,16:00:00
+11,Statistics 2 ,1,08:00:00,10:00:00
+12,International Diplomacy,2,16:00:00,18:00:00
+13,UN Structure,2,12:00:00,14:00:00
+14,Global Ethics ,1,14:00:00,16:00:00
+15,International Security,3,08:00:00,10:00:00
