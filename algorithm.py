@@ -566,8 +566,6 @@ def format_results(assignments, students, courses, lab_sections, time_slots):
 
 
 
-
-
 def verify_assignment(assignments, data):
     """Verify that all constraints are met in the assignment"""
     print("\nVerifying constraints:")

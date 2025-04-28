@@ -4,18 +4,44 @@
 #from students import Student
 
 #Helper libraries
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for, session
 import threading
 import webbrowser
 import algorithm 
 
 #Create a Flask app
 app = Flask(__name__)
+app.secret_key = 'your_unique_secret_key'
 
-@app.route("/")
+USERNAME = 'admin'
+PASSWORD = 'password123'
+
+@app.route("/", methods = ['GET', 'POST'])
+@app.route('/login', methods = ['GET', 'POST'])
+def login():
+    error = None
+    username = ''
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+    
+        if username == USERNAME and password == PASSWORD:
+            session['user'] = username
+            return redirect(url_for('home'))
+        
+        else:
+            error = "Invalid username or password."
+    
+    return render_template('login.html', error=error, username = username)
+
 @app.route("/home")
 def home():
-    return render_template("home.html")
+    if 'user' in session:
+
+        return render_template("home.html")
+    else:
+        return redirect(url_for('login'))
+
 
 @app.route('/student_demo')
 def student_demo():
@@ -43,9 +69,9 @@ def demo():
             
     return render_template('demo.html', output = output)
 
-@app.route('/classes')
-def classes():
-    return render_template('classes.html')
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
 #Function to open browser automatically
 def open_browser():
