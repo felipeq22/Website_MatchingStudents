@@ -62,8 +62,7 @@ from collections import defaultdict
 # Respects the maximum capacity constraints of each course.
   
 
-
-def load_data():
+def load_data_first():
     """Load necessary CSV files for course matching."""
     # Load CSV files
     course_data = pd.read_csv('course.csv')
@@ -89,7 +88,7 @@ def optimize_course_matching():
     Optimize course matching for students
     """
     # Load data
-    course_data, student_data, elective_capacity_data, elective_preference_data = load_data()
+    course_data, student_data, elective_capacity_data, elective_preference_data = load_data_first()
     
     # Create PuLP model
     model = pulp.LpProblem("Course_Matching", pulp.LpMaximize)
@@ -274,10 +273,8 @@ if __name__ == "__main__":
 # - Time Conflict: Prevents assigning conflicting lab times to the same student
 # - Capacity: Ensures no lab section exceeds its maximum capacity
 
-  
 
-
-def load_data():
+def load_data_second():
     """
     Load necessary data for lab matching optimization
     """
@@ -324,7 +321,7 @@ def optimize_lab_matching():
     Optimize lab matching for students based on course matching and preferences
     """
     (student_course_matching, lab_time_data, day_mapping, 
-     pre_lab_ele_man_data, theory_time_data, course_data) = load_data()
+     pre_lab_ele_man_data, theory_time_data, course_data) = load_data_second()
     
     print("Initial Data Analysis:")
     print("Total students in course matching:", len(student_course_matching['student_id'].unique()))
@@ -478,7 +475,7 @@ def main():
 if __name__ == "__main__":
     main()
 
-
+'''
 #gale-shapely
 import pandas as pd
 from collections import defaultdict
@@ -939,3 +936,5 @@ if __name__ == "__main__":
 
 #Includes theory and lab times for all courses
 #Reports any students who couldn't be assigned to labs
+
+'''

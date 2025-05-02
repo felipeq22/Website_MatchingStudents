@@ -4,37 +4,35 @@ import sqlite3
 #load csv
 
 
-course = pd.read_csv("course.csv")
-day = pd.read_csv("day.csv")
-elective_capacity = pd.read_csv("elective_capacity.csv")
-elective_preference = pd.read_csv("elective_preference.csv")
-lab_time = pd.read_csv("lab_time.csv")
-pre_lab_ele_man = pd.read_csv("pre_lab_ele_man.csv")
-program = pd.read_csv("program.csv")
-student = pd.read_csv("student.csv")
-theory_time = pd.read_csv("theory_time.csv")
+def load_csvs_to_db(csv_folder_path, db_name="student_matching.db"):
+    # Define the filenames and corresponding table names
+    files_tables = {
+        "course.csv": "course",
+        "day.csv": "day",
+        "elective_capacity.csv": "elective_capacity",
+        "elective_preference.csv": "elective_preference",
+        "lab_time.csv": "lab_time",
+        "pre_lab_ele_man.csv": "pre_lab_ele_man",
+        "program.csv": "program",
+        "student.csv": "student",
+        "theory_time.csv": "theory"
+    }
 
-#make database
+    # Create connection to the SQLite database
+    conn = sqlite3.connect(db_name)
 
-# Create a connection to the database (or create it if it doesn't exist)
-conn = sqlite3.connect("student_matching.db")
+    # Read each CSV and store in the database
+    for filename, table_name in files_tables.items():
+        df = pd.read_csv(f"{csv_folder_path}/{filename}")
+        df.to_sql(table_name, conn, if_exists="replace", index=False)
 
-# Save each DataFrame to the database as a table
-course.to_sql("course", conn, if_exists="replace", index=False)
-day.to_sql("day", conn, if_exists="replace", index=False)
-elective_capacity.to_sql("elective_capacity", conn, if_exists="replace", index=False)
-elective_preference.to_sql("elective_preference", conn, if_exists="replace", index=False)
-lab_time.to_sql("lab_time", conn, if_exists="replace", index=False)
-pre_lab_ele_man.to_sql("pre_lab_ele_man", conn, if_exists="replace", index=False)
-program.to_sql("program", conn, if_exists="replace", index=False)
-student.to_sql("student", conn, if_exists="replace", index=False)
-theory.to_sql("theory", conn, if_exists="replace", index=False)
-
-conn.commit()
+    conn.commit()
+    conn.close()
+    print(f"All tables loaded into {db_name}")
 
 #load data for elective course matching
 
-def load_elective_matching_data():
+def load_data_first():
     """
     Load data for elective course matching from the SQLite database.
     """
@@ -56,7 +54,7 @@ def load_elective_matching_data():
 
 #load data for lab course matching
 
-def load_lab_matching_data():
+def load_data_second():
     """
     Load data for lab matching optimization from the SQLite database.
     """
