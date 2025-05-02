@@ -73,6 +73,13 @@ def demo():
 def about():
     return render_template('about.html')
 
+@app.route('/walk_through')
+def walk_through():
+    return render_template('walk_through.html')
+    
+def about():
+    return render_template('about.html')
+
 #Function to open browser automatically
 def open_browser():
     webbrowser.open_new("http://127.0.0.1:5000/")
