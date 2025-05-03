@@ -1,29 +1,29 @@
 student_id,student_name,course_id,course_name,course_type,theory_day,theory_start_time,theory_end_time,lab_day,lab_start_time,lab_end_time
-2501,A,1,Machine Learning,Mandatory,Monday,08:00:00,10:00:00,Thursday,14:00:00,16:00:00
-2501,A,2,Data structure and algorithm,Mandatory,Tuesday,16:00:00,18:00:00,Wednesday,16:00:00,18:00:00
-2501,A,3,Deep learning,Elective,Tuesday,12:00:00,14:00:00,Tuesday,16:00:00,18:00:00
-2501,A,4,Natural Language Processing,Elective,Wednesday,08:00:00,10:00:00,Thursday,18:00:00,20:00:00
-2502,B,11,Statistics 2,Mandatory,Monday,08:00:00,10:00:00,Friday,14:00:00,16:00:00
-2502,B,12,International Diplomacy,Mandatory,Tuesday,16:00:00,18:00:00,Wednesday,16:00:00,18:00:00
-2502,B,14,Global Ethics,Elective,Monday,14:00:00,16:00:00,N/A,N/A,N/A
-2502,B,15,International Security,Elective,Wednesday,08:00:00,10:00:00,N/A,N/A,N/A
-2503,C,6,Statistics 2,Mandatory,Monday,08:00:00,10:00:00,Thursday,10:00:00,12:00:00
-2503,C,7,Economics 2,Mandatory,Tuesday,16:00:00,18:00:00,Thursday,16:00:00,18:00:00
-2503,C,8,Global Ethics,Elective,Tuesday,12:00:00,14:00:00,N/A,N/A,N/A
-2503,C,9,Development Economics,Elective,Wednesday,08:00:00,10:00:00,Thursday,18:00:00,20:00:00
-2504,D,1,Machine Learning,Mandatory,Monday,08:00:00,10:00:00,Thursday,14:00:00,16:00:00
-2504,D,2,Data structure and algorithm,Mandatory,Tuesday,16:00:00,18:00:00,Wednesday,16:00:00,18:00:00
-2504,D,4,Natural Language Processing,Elective,Wednesday,08:00:00,10:00:00,Wednesday,18:00:00,20:00:00
-2504,D,5,Law and Governance,Elective,Monday,14:00:00,16:00:00,N/A,N/A,N/A
-2505,E,11,Statistics 2,Mandatory,Monday,08:00:00,10:00:00,Tuesday,10:00:00,12:00:00
-2505,E,12,International Diplomacy,Mandatory,Tuesday,16:00:00,18:00:00,Thursday,16:00:00,18:00:00
-2505,E,13,UN Structure,Elective,Tuesday,12:00:00,14:00:00,N/A,N/A,N/A
-2505,E,14,Global Ethics,Elective,Monday,14:00:00,16:00:00,N/A,N/A,N/A
-2506,F,6,Statistics 2,Mandatory,Monday,08:00:00,10:00:00,Thursday,10:00:00,12:00:00
-2506,F,7,Economics 2,Mandatory,Tuesday,16:00:00,18:00:00,Thursday,16:00:00,18:00:00
-2506,F,8,Global Ethics,Elective,Tuesday,12:00:00,14:00:00,N/A,N/A,N/A
-2506,F,10,Law and Governance,Elective,Monday,14:00:00,16:00:00,N/A,N/A,N/A
-2507,G,1,Machine Learning,Mandatory,Monday,08:00:00,10:00:00,Thursday,14:00:00,16:00:00
-2507,G,2,Data structure and algorithm,Mandatory,Tuesday,16:00:00,18:00:00,Thursday,16:00:00,18:00:00
-2507,G,3,Deep learning,Elective,Tuesday,12:00:00,14:00:00,Friday,08:00:00,10:00:00
-2507,G,5,Law and Governance,Elective,Monday,14:00:00,16:00:00,N/A,N/A,N/A
+2501,Elena Murray,1,Machine Learning,Mandatory,Monday,08:00:00,10:00:00,Thursday,14:00:00,16:00:00
+2501,Elena Murray,2,Data structure and algorithm,Mandatory,Tuesday,16:00:00,18:00:00,Wednesday,16:00:00,18:00:00
+2501,Elena Murray,3,Deep learning,Elective,Tuesday,12:00:00,14:00:00,Tuesday,16:00:00,18:00:00
+2501,Elena Murray,4,Natural Language Processing,Elective,Wednesday,08:00:00,10:00:00,Thursday,18:00:00,20:00:00
+2502,Dominik Allen,11,Statistics 2,Mandatory,Monday,08:00:00,10:00:00,Friday,14:00:00,16:00:00
+2502,Dominik Allen,12,International Diplomacy,Mandatory,Tuesday,16:00:00,18:00:00,Wednesday,16:00:00,18:00:00
+2502,Dominik Allen,14,Global Ethics,Elective,Monday,14:00:00,16:00:00,N/A,N/A,N/A
+2502,Dominik Allen,15,International Security,Elective,Wednesday,08:00:00,10:00:00,N/A,N/A,N/A
+2503,Corbin Cerny,6,Statistics 2,Mandatory,Monday,08:00:00,10:00:00,Thursday,10:00:00,12:00:00
+2503,Corbin Cerny,7,Economics 2,Mandatory,Tuesday,16:00:00,18:00:00,Thursday,16:00:00,18:00:00
+2503,Corbin Cerny,8,Global Ethics,Elective,Tuesday,12:00:00,14:00:00,N/A,N/A,N/A
+2503,Corbin Cerny,9,Development Economics,Elective,Wednesday,08:00:00,10:00:00,Thursday,18:00:00,20:00:00
+2504,Juan Quinones,1,Machine Learning,Mandatory,Monday,08:00:00,10:00:00,Thursday,14:00:00,16:00:00
+2504,Juan Quinones,2,Data structure and algorithm,Mandatory,Tuesday,16:00:00,18:00:00,Wednesday,16:00:00,18:00:00
+2504,Juan Quinones,4,Natural Language Processing,Elective,Wednesday,08:00:00,10:00:00,Wednesday,18:00:00,20:00:00
+2504,Juan Quinones,5,Law and Governance,Elective,Monday,14:00:00,16:00:00,N/A,N/A,N/A
+2505,Aditi Joshi,11,Statistics 2,Mandatory,Monday,08:00:00,10:00:00,Tuesday,10:00:00,12:00:00
+2505,Aditi Joshi,12,International Diplomacy,Mandatory,Tuesday,16:00:00,18:00:00,Thursday,16:00:00,18:00:00
+2505,Aditi Joshi,13,UN Structure,Elective,Tuesday,12:00:00,14:00:00,N/A,N/A,N/A
+2505,Aditi Joshi,14,Global Ethics,Elective,Monday,14:00:00,16:00:00,N/A,N/A,N/A
+2506,Saurav Jha,6,Statistics 2,Mandatory,Monday,08:00:00,10:00:00,Thursday,10:00:00,12:00:00
+2506,Saurav Jha,7,Economics 2,Mandatory,Tuesday,16:00:00,18:00:00,Thursday,16:00:00,18:00:00
+2506,Saurav Jha,8,Global Ethics,Elective,Tuesday,12:00:00,14:00:00,N/A,N/A,N/A
+2506,Saurav Jha,10,Law and Governance,Elective,Monday,14:00:00,16:00:00,N/A,N/A,N/A
+2507,John Smith,1,Machine Learning,Mandatory,Monday,08:00:00,10:00:00,Thursday,14:00:00,16:00:00
+2507,John Smith,2,Data structure and algorithm,Mandatory,Tuesday,16:00:00,18:00:00,Thursday,16:00:00,18:00:00
+2507,John Smith,3,Deep learning,Elective,Tuesday,12:00:00,14:00:00,Friday,08:00:00,10:00:00
+2507,John Smith,5,Law and Governance,Elective,Monday,14:00:00,16:00:00,N/A,N/A,N/A

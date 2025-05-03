@@ -1,8 +1,8 @@
 student_id ,name ,program,program_id,required_electives
-2501,A,MDS,1,2
-2502,B,MIA,3,2
-2503,C,MPP,2,2
-2504,D,MDS,1,2
-2505,E,MIA,3,2
-2506,F,MPP,2,2
-2507,G,MDS,1,2
+2501,Elena Murray,MDS,1,2
+2502,Dominik Allen,MIA,3,2
+2503,Corbin Cerny,MPP,2,2
+2504,Juan Quinones,MDS,1,2
+2505,Aditi Joshi,MIA,3,2
+2506,Saurav Jha,MPP,2,2
+2507,John Smith,MDS,1,2

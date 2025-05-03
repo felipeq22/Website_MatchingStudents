@@ -1,766 +1,940 @@
-import pulp
 import pandas as pd
 import numpy as np
+import pulp
+import matplotlib.pyplot as plt
+import seaborn as sns
 from collections import defaultdict
-import random
-import time
-import math
 
-def phase1_course_matching(students, courses, course_preferences, 
-                          mandatory_courses, max_electives):
+
+#Sets and Parameters
+#SS
+#S: Set of students
+
+#CC
+#C: Set of courses
+    
+#PsP_s
+#Ps​: Set of program-specific courses for student ss
+
+    
+#Decision Variables
+#Xsc∈{0,1}X_{sc} \in {0, 1}
+#Xsc​∈{0,1}:\
+    
+#Xsc=1X_{sc} = 1
+#Xsc​=1 if student ss
+#s is assigned to course cc
+#Xsc=0X_{sc} = 0
+#Xsc​=0 otherwise
+
+
+
+# Utility Function
+# Usc=max⁡(10−ranksc,1)U_{sc} = \\max(10 - \\text{rank}_{sc}, 1)
+# Usc​=max(10−ranksc​,1)
+# Objective Function:
+# Maximize ∑_{s ∈ S} ∑_{c ∈ C} U_sc * X_sc
+# Where:
+# U_sc = max(10 - rank_sc, 1)
+# X_sc ∈ {0, 1} (1 if student s is assigned to course c, 0 otherwise)
+
+# Constraints:
+# 1. Mandatory Course Constraint:
+# ∀ s ∈ S, ∀ c ∈ P_s such that c is mandatory:
+# X_sc = 1
+
+#2 Elective Course Limit Constraint:
+# ∀ s ∈ S:
+# ∑_{c ∈ P_s where c is elective} X_sc = required_electives_s
+
+# 3. Course Capacity Constraint:
+# ∀ c ∈ C:
+# ∑_{s ∈ S} X_sc ≤ capacity_c
+
+# 4. Binary Constraint:
+# ∀ s ∈ S, ∀ c ∈ C:
+# X_sc ∈ {0, 1}
+
+# Interpretation:
+# Maximizes total utility of course assignments.
+# Ensures mandatory courses are assigned to students.
+# Limits elective courses assigned per student to the required number.
+# Respects the maximum capacity constraints of each course.
+  
+
+def load_data_first():
+    """Load necessary CSV files for course matching."""
+    # Load CSV files
+    course_data = pd.read_csv('course.csv')
+    student_data = pd.read_csv('student.csv')
+    elective_capacity_data = pd.read_csv('elective_capacity.csv')
+    elective_preference_data = pd.read_csv('elective_preference.csv')
+    
+    # Strip whitespace from column names
+    course_data.columns = course_data.columns.str.strip()
+    student_data.columns = student_data.columns.str.strip()
+    elective_capacity_data.columns = elective_capacity_data.columns.str.strip()
+    elective_preference_data.columns = elective_preference_data.columns.str.strip()
+    
+    # Strip whitespace from string columns
+    for df in [course_data, student_data, elective_capacity_data, elective_preference_data]:
+        for col in df.select_dtypes(include=['object']).columns:
+            df[col] = df[col].str.strip()
+    
+    return course_data, student_data, elective_capacity_data, elective_preference_data
+
+def optimize_course_matching():
     """
-    Phase 1: Match students to courses using Integer Linear Programming.
-    
-    Parameters:
-    -----------
-    students : list of dict
-        List of student information with keys 'id', 'name', 'program'
-    courses : list of dict
-        List of course information with keys 'id', 'name', 'type', 'allowed_programs', 'has_lab'
-    course_preferences : dict
-        Dict mapping (student_id, course_id) to preference rank (1-5, where 1 is most preferred)
-    mandatory_courses : dict
-        Dict mapping program to list of mandatory course_ids
-    max_electives : dict
-        Dict mapping program to number of elective courses each student should take
-        
-    Returns:
-    --------
-    course_assignments : dict
-        Dict mapping student_id to list of assigned course_ids
-    stats : dict
-        Dict containing statistics about the assignment
+    Optimize course matching for students
     """
-    # Create the ILP problem
-    prob = pulp.LpProblem("CourseMatching", pulp.LpMaximize)
+    # Load data
+    course_data, student_data, elective_capacity_data, elective_preference_data = load_data_first()
     
-    # Decision variables - x[s,c] = 1 if student s is assigned to course c
-    x = {}
-    for student in students:
-        student_id = student['id']
-        program = student['program']
-        
-        # Student can only take courses allowed for their program
-        allowed_courses = [c['id'] for c in courses if program in c['allowed_programs']]
-        
-        for course_id in allowed_courses:
-            x[(student_id, course_id)] = pulp.LpVariable(
-                f"x_{student_id}_{course_id}", cat=pulp.LpBinary
-            )
+    # Create PuLP model
+    model = pulp.LpProblem("Course_Matching", pulp.LpMaximize)
     
-    # Objective function: Maximize course preference satisfaction
-    objective_terms = []
-    for student in students:
-        student_id = student['id']
-        
-        for course in courses:
-            course_id = course['id']
-            if student['program'] in course['allowed_programs']:
-                # Get course preference weight (convert rank to weight)
-                course_pref_rank = course_preferences.get((student_id, course_id), 3)  # Default to middle rank
-                course_weight = max(6 - course_pref_rank, 1)  # Convert to weight (5 is best, 1 is worst)
-                
-                if (student_id, course_id) in x:
-                    objective_terms.append(course_weight * x[(student_id, course_id)])
+    # Prepare data
+    students = student_data['student_id'].tolist()
+    courses = course_data['course_id'].tolist()
     
-    prob += pulp.lpSum(objective_terms)
+    # Decision variables
+    # X[s,c] = 1 if student s is assigned to course c, 0 otherwise
+    X = pulp.LpVariable.dicts("X", 
+                             [(s, c) for s in students for c in courses], 
+                             cat=pulp.LpBinary)
     
-    # Constraint 1: Each student must take their mandatory courses
-    for student in students:
-        student_id = student['id']
-        program = student['program']
-        
-        for course_id in mandatory_courses[program]:
-            if (student_id, course_id) in x:
-                prob += x[(student_id, course_id)] == 1
+    # Objective function: utility based on preference ranking
+    def calculate_utility(rank):
+        return max(10 - rank, 1)
     
-    # Constraint 2: Each student must take the required number of elective courses
-    for student in students:
-        student_id = student['id']
-        program = student['program']
-        required_electives = max_electives[program]
+    # Preference utility
+    preference_utility = []
+    for _, pref in elective_preference_data.iterrows():
+        student_id = pref['student_id']
+        course_id = pref['course_id']
+        utility = calculate_utility(pref['preference_rank'])
+        preference_utility.append(utility * X[(student_id, course_id)])
+    
+    # Set objective: maximize preference utility
+    model += pulp.lpSum(preference_utility), "Preference Utility"
+    
+    # Constraints
+    # 1. Mandatory course constraints
+    for _, student in student_data.iterrows():
+        student_id = student['student_id']
+        program_id = student['program_id']
         
-        elective_courses = [c['id'] for c in courses 
-                           if c['type'] == 'elective' and program in c['allowed_programs']]
+        # Identify mandatory courses for this student's program
+        mandatory_courses = course_data[
+            (course_data['program_id'] == program_id) & 
+            (course_data['mandatory'] == 1)
+        ]['course_id'].tolist()
         
+        # Ensure all mandatory courses are assigned
+        for course_id in mandatory_courses:
+            model += X[(student_id, course_id)] == 1, f"Mandatory_{student_id}_{course_id}"
+    
+    # 2. Elective course constraints
+    for _, student in student_data.iterrows():
+        student_id = student['student_id']
+        program_id = student['program_id']
+        required_electives = student['required_electives']
+        
+        # Identify elective courses for this student's program
+        elective_courses = course_data[
+            (course_data['program_id'] == program_id) & 
+            (course_data['mandatory'] == 0)
+        ]['course_id'].tolist()
+        
+        # Ensure exact number of electives are assigned
         if elective_courses:
-            prob += pulp.lpSum(
-                x.get((student_id, course_id), 0) for course_id in elective_courses
-            ) == required_electives
+            model += pulp.lpSum(X[(student_id, c)] for c in elective_courses) == required_electives, f"ElectiveLimit_{student_id}"
     
-    # Solve the problem
-    start_time = time.time()
-    prob.solve(pulp.PULP_CBC_CMD(msg=False))
-    solving_time = time.time() - start_time
-    
-    # Extract the solution
-    course_assignments = {}
-    for student in students:
-        student_id = student['id']
-        course_assignments[student_id] = []
+    # 3. Elective course capacity constraints
+    for _, capacity in elective_capacity_data.iterrows():
+        course_id = capacity['course_id']
+        max_capacity = capacity['capacity']
         
-        for course in courses:
-            course_id = course['id']
-            if (student_id, course_id) in x and pulp.value(x[(student_id, course_id)]) == 1:
-                course_assignments[student_id].append(course_id)
+        model += pulp.lpSum(X[(s, course_id)] for s in students) <= max_capacity, f"ElectiveCapacity_{course_id}"
     
-    # Calculate statistics
-    total_preference = 0
-    for student in students:
-        student_id = student['id']
-        for course_id in course_assignments[student_id]:
-            course_pref_rank = course_preferences.get((student_id, course_id), 3)
-            course_weight = max(6 - course_pref_rank, 1)
-            total_preference += course_weight
+    # Solve the model
+    model.solve()
     
-    stats = {
-        'status': pulp.LpStatus[prob.status],
-        'obj_value': pulp.value(prob.objective),
-        'total_preference': total_preference,
-        'avg_preference': total_preference / len(students) if students else 0,
-        'solving_time': solving_time
-    }
+    # Check solution status
+    if pulp.LpStatus[model.status] != 'Optimal':
+        print("Could not find an optimal solution.")
+        return None
     
-    return course_assignments, stats 
-
-
-
-
-def phase2_time_matching(students, courses, lab_sections, course_assignments, 
-                        lab_time_preferences, time_slots, lab_capacity):
-    """
-    Phase 2: Assign lab times to students based on the course assignments from Phase 1.
-    
-    Parameters:
-    -----------
-    students : list of dict
-        List of student information
-    courses : list of dict
-        List of course information
-    lab_sections : list of dict
-        List of lab sections with keys 'id', 'course_id', 'time_slot'
-    course_assignments : dict
-        Dict mapping student_id to list of assigned course_ids (from Phase 1)
-    lab_time_preferences : dict
-        Dict mapping (student_id, time_slot_id) to preference rank
-    time_slots : dict
-        Dict mapping time_slot_id to time information
-    lab_capacity : int
-        Maximum number of students in each lab section
+    # Extract results
+    results = []
+    for _, student in student_data.iterrows():
+        student_id = student['student_id']
+        program_id = student['program_id']
         
-    Returns:
-    --------
-    time_assignments : dict
-        Dict mapping (student_id, course_id) to lab_section_id
-    stats : dict
-        Dict containing statistics about the assignment
-    """
-    # Create the ILP problem
-    prob = pulp.LpProblem("TimeMatching", pulp.LpMaximize)
-    
-    # Decision variables - x[s,c,l] = 1 if student s is assigned to lab section l for course c
-    x = {}
-    
-    # Create variables only for courses that have labs
-    for student_id, assigned_courses in course_assignments.items():
-        for course_id in assigned_courses:
-            course = next(c for c in courses if c['id'] == course_id)
-            
-            # Only create variables for courses with labs
-            if course['has_lab']:
-                # Find lab sections for this course
-                course_sections = [ls['id'] for ls in lab_sections if ls['course_id'] == course_id]
-                
-                for section_id in course_sections:
-                    x[(student_id, course_id, section_id)] = pulp.LpVariable(
-                        f"x_{student_id}_{course_id}_{section_id}", cat=pulp.LpBinary
-                    )
-    
-    # Objective function: Maximize lab time preference satisfaction
-    objective_terms = []
-    
-    for student_id, assigned_courses in course_assignments.items():
-        for course_id in assigned_courses:
-            course = next(c for c in courses if c['id'] == course_id)
-            
-            if course['has_lab']:
-                for section in lab_sections:
-                    if section['course_id'] == course_id:
-                        section_id = section['id']
-                        time_slot = section['time_slot']
-                        
-                        # Get time preference weight
-                        time_pref_rank = lab_time_preferences.get((student_id, time_slot), 3)
-                        time_weight = max(6 - time_pref_rank, 1)  # Convert to weight
-                        
-                        if (student_id, course_id, section_id) in x:
-                            objective_terms.append(time_weight * x[(student_id, course_id, section_id)])
-    
-    prob += pulp.lpSum(objective_terms)
-    
-    # Constraint 1: Each student must be assigned to exactly one lab section for each of their 
-    # assigned courses that have labs
-    for student_id, assigned_courses in course_assignments.items():
-        for course_id in assigned_courses:
-            course = next(c for c in courses if c['id'] == course_id)
-            
-            if course['has_lab']:
-                course_sections = [ls['id'] for ls in lab_sections if ls['course_id'] == course_id]
-                
-                prob += pulp.lpSum(
-                    x.get((student_id, course_id, section_id), 0) for section_id in course_sections
-                ) == 1
-    
-    # Constraint 2: Lab section capacity
-    for section in lab_sections:
-        section_id = section['id']
-        course_id = section['course_id']
+        # Find mandatory courses
+        mandatory_courses = course_data[
+            (course_data['program_id'] == program_id) & 
+            (course_data['mandatory'] == 1)
+        ]
         
-        # Find all students assigned to this course
-        assigned_students = [student_id for student_id, courses in course_assignments.items() 
-                            if course_id in courses]
+        # Find elective courses
+        elective_courses = course_data[
+            (course_data['program_id'] == program_id) & 
+            (course_data['mandatory'] == 0)
+        ]
         
-        prob += pulp.lpSum(
-            x.get((student_id, course_id, section_id), 0) for student_id in assigned_students
-            if (student_id, course_id, section_id) in x
-        ) <= lab_capacity
-    
-    # Constraint 3: No time conflicts between lab sections
-    for student_id, assigned_courses in course_assignments.items():
-        # Get all pairs of assigned courses that have labs
-        courses_with_labs = [cid for cid in assigned_courses 
-                           if next(c for c in courses if c['id'] == cid)['has_lab']]
+        # Track assigned courses
+        for _, course in mandatory_courses.iterrows():
+            if X[(student_id, course['course_id'])].value() > 0.5:
+                results.append({
+                    'student_id': student_id,
+                    'student_name': student_data[student_data['student_id'] == student_id]['name'].iloc[0],
+                    'course_type': 'Mandatory',
+                    'course_id': course['course_id'],
+                    'course_name': course['course_name']
+                })
         
-        # For each time slot, ensure student is assigned to at most one lab at that time
-        for time_slot_id in time_slots:
-            # Get all lab sections at this time slot for the student's assigned courses
-            conflicting_sections = []
-            for course_id in courses_with_labs:
-                sections_at_time = [ls['id'] for ls in lab_sections 
-                                  if ls['course_id'] == course_id and ls['time_slot'] == time_slot_id]
-                conflicting_sections.extend([(course_id, section_id) for section_id in sections_at_time])
-            
-            if len(conflicting_sections) >= 2:  # Only need constraint if there are at least 2 possible conflicts
-                prob += pulp.lpSum(
-                    x.get((student_id, course_id, section_id), 0)
-                    for course_id, section_id in conflicting_sections
-                    if (student_id, course_id, section_id) in x
-                ) <= 1
-    
-    # Constraint 4: No conflicts between theory class times and lab times
-    for student_id, assigned_courses in course_assignments.items():
-        # For each assigned course with a theory time
-        for course1_id in assigned_courses:
-            course1 = next(c for c in courses if c['id'] == course1_id)
-            theory_time = course1['theory_time_slot']
-            
-            # Check other assigned courses with labs
-            for course2_id in assigned_courses:
-                if course1_id != course2_id:
-                    course2 = next(c for c in courses if c['id'] == course2_id)
-                    
-                    if course2['has_lab']:
-                        # Find lab sections for course2 that conflict with course1's theory time
-                        conflicting_sections = [ls['id'] for ls in lab_sections 
-                                             if ls['course_id'] == course2_id and ls['time_slot'] == theory_time]
-                        
-                        for section_id in conflicting_sections:
-                            if (student_id, course2_id, section_id) in x:
-                                prob += x[(student_id, course2_id, section_id)] == 0
-    
-    # Solve the problem
-    start_time = time.time()
-    prob.solve(pulp.PULP_CBC_CMD(msg=False))
-    solving_time = time.time() - start_time
-    
-    # Extract the solution
-    time_assignments = {}
-    
-    for student_id, assigned_courses in course_assignments.items():
-        for course_id in assigned_courses:
-            course = next(c for c in courses if c['id'] == course_id)
-            
-            if course['has_lab']:
-                # Find which lab section was assigned
-                for section in lab_sections:
-                    if section['course_id'] == course_id:
-                        section_id = section['id']
-                        if (student_id, course_id, section_id) in x and pulp.value(x[(student_id, course_id, section_id)]) == 1:
-                            time_assignments[(student_id, course_id)] = {'type': 'lab', 'section_id': section_id}
-            else:
-                # For courses without labs
-                time_assignments[(student_id, course_id)] = {'type': 'no_lab'}
-    
-    # Calculate statistics
-    lab_assignments_count = 0
-    total_preference = 0
-    
-    for (student_id, course_id), assignment in time_assignments.items():
-        if assignment['type'] == 'lab':
-            lab_assignments_count += 1
-            section_id = assignment['section_id']
-            section = next(s for s in lab_sections if s['id'] == section_id)
-            time_slot = section['time_slot']
-            time_pref_rank = lab_time_preferences.get((student_id, time_slot), 3)
-            time_weight = max(6 - time_pref_rank, 1)
-            total_preference += time_weight
-    
-    stats = {
-        'status': pulp.LpStatus[prob.status],
-        'obj_value': pulp.value(prob.objective),
-        'total_preference': total_preference,
-        'avg_preference': total_preference / lab_assignments_count if lab_assignments_count > 0 else 0,
-        'solving_time': solving_time
-    }
-    
-    return time_assignments, stats
-
-
-
-def two_phase_assignment(students, courses, lab_sections, course_preferences, 
-                        lab_time_preferences, time_slots, mandatory_courses, 
-                        max_electives, lab_capacity):
-    """
-    Run the complete two-phase course assignment algorithm.
-    
-    Phase 1: Match students to courses
-    Phase 2: Assign lab times based on course matches
-    
-    Returns:
-    --------
-    assignments : dict
-        Dict mapping (student_id, course_id) to lab assignment details
-    stats : dict
-        Statistics about both phases
-    """
-    print("Running Phase 1: Course Matching...")
-    course_assignments, phase1_stats = phase1_course_matching(
-        students, courses, course_preferences, mandatory_courses, max_electives
-    )
-    
-    print("Running Phase 2: Time Matching...")
-    time_assignments, phase2_stats = phase2_time_matching(
-        students, courses, lab_sections, course_assignments, 
-        lab_time_preferences, time_slots, lab_capacity
-    )
-    
-    # Combine statistics
-    stats = {
-        'phase1': phase1_stats,
-        'phase2': phase2_stats,
-        'total_solving_time': phase1_stats['solving_time'] + phase2_stats['solving_time']
-    }
-    
-    return time_assignments, stats
-
-
-
-
-def generate_test_data(num_students=15, lab_capacity=3):
-    """
-    Generate test data for the course assignment problem with:
-    - Each course has one theory class time slot for all students
-    - Each course either has 2 lab sections or no lab at all
-    """
-    programs = ['MPP', 'MDS', 'MIA']
-    
-    # Generate students
-    students = []
-    for i in range(num_students):
-        program = programs[i % len(programs)]  # Distribute students evenly across programs
-        students.append({
-            'id': f's{i+1}',
-            'name': f'Student {i+1}',
-            'program': program
-        })
-    
-    # Generate time slots
-    time_slots = {
-        't1': "Monday 9-11",
-        't2': "Monday 2-4",
-        't3': "Tuesday 9-11",
-        't4': "Tuesday 2-4",
-        't5': "Wednesday 9-11",
-        't6': "Wednesday 2-4",
-        't7': "Thursday 9-11",
-        't8': "Thursday 2-4",
-        't9': "Friday 9-11",
-        't10': "Friday 2-4"
-    }
-    
-    # Generate courses (mix of mandatory and elective, with and without labs)
-    courses = []
-    
-    # Mandatory courses (2 per program)
-    for p_idx, program in enumerate(programs):
-        for j in range(2):
-            theory_time_slot = random.choice(list(time_slots.keys()))
-            has_lab = random.choice([True, False])  # 50% chance of having labs
-            
-            courses.append({
-                'id': f'c{len(courses)+1}',
-                'name': f'{program} Mandatory {j+1}',
-                'type': 'mandatory',
-                'allowed_programs': [program],
-                'theory_time_slot': theory_time_slot,
-                'has_lab': has_lab
-            })
-    
-    # Elective courses (shared among programs)
-    for i in range(6):  # 6 elective courses
-        # Randomly choose which programs can take this elective
-        allowed = []
-        for program in programs:
-            if random.random() > 0.3:  # 70% chance a program can take an elective
-                allowed.append(program)
-        
-        if not allowed:  # Ensure at least one program can take the course
-            allowed = [random.choice(programs)]
-        
-        theory_time_slot = random.choice(list(time_slots.keys()))
-        has_lab = random.choice([True, False])  # 50% chance of having labs
-            
-        courses.append({
-            'id': f'c{len(courses)+1}',
-            'name': f'Elective {i+1}',
-            'type': 'elective',
-            'allowed_programs': allowed,
-            'theory_time_slot': theory_time_slot,
-            'has_lab': has_lab
-        })
-    
-    # Generate lab sections (exactly 2 for courses that have labs)
-    lab_sections = []
-    for course in courses:
-        if course['has_lab']:
-            # Create exactly 2 lab sections for this course
-            for j in range(2):
-                # Make sure lab time doesn't conflict with the course's theory time
-                available_slots = [ts for ts in time_slots.keys() if ts != course['theory_time_slot']]
-                time_slot = random.choice(available_slots)
-                
-                lab_sections.append({
-                    'id': f'l{len(lab_sections)+1}',
-                    'course_id': course['id'],
-                    'time_slot': time_slot
+        for _, course in elective_courses.iterrows():
+            if X[(student_id, course['course_id'])].value() > 0.5:
+                results.append({
+                    'student_id': student_id,
+                    'student_name': student_data[student_data['student_id'] == student_id]['name'].iloc[0],
+                    'course_type': 'Elective',
+                    'course_id': course['course_id'],
+                    'course_name': course['course_name']
                 })
     
-    # Define mandatory courses for each program
-    mandatory_courses = {program: [] for program in programs}
-    for course in courses:
-        if course['type'] == 'mandatory':
-            for program in course['allowed_programs']:
-                mandatory_courses[program].append(course['id'])
+    # Convert to DataFrame and export
+    results_df = pd.DataFrame(results)
+    results_df.to_csv('student_course_matching.csv', index=False)
     
-    # Define number of elective courses per program
-    max_electives = {
-        'MPP': 2,
-        'MDS': 3,
-        'MIA': 2
-    }
-    
-    # Generate student preferences for courses
-    course_preferences = {}
-    for student in students:
-        # Set preference for all courses this student can take
-        for course in courses:
-            if student['program'] in course['allowed_programs']:
-                if course['type'] == 'mandatory':
-                    # Random preference between 1-3 for mandatory courses
-                    course_preferences[(student['id'], course['id'])] = random.randint(1, 3)
-                else:
-                    # Random preference between 1-5 for elective courses
-                    course_preferences[(student['id'], course['id'])] = random.randint(1, 5)
-    
-    # Generate student preferences for lab times
-    lab_time_preferences = {}
-    for student in students:
-        for time_slot_id in time_slots:
-            # Random preference between 1 and 5 for time slots
-            lab_time_preferences[(student['id'], time_slot_id)] = random.randint(1, 5)
-    
-    return {
-        'students': students,
-        'courses': courses,
-        'lab_sections': lab_sections,
-        'course_preferences': course_preferences,
-        'lab_time_preferences': lab_time_preferences,
-        'time_slots': time_slots,
-        'mandatory_courses': mandatory_courses,
-        'max_electives': max_electives,
-        'lab_capacity': lab_capacity
-    }
+    print("Course matching completed. Results saved to student_course_matching.csv")
+    return results_df
 
-def format_results(assignments, students, courses, lab_sections, time_slots):
-    """Format the assignment results into a readable dataframe"""
-    results = []
-    
-    for student in students:
-        student_id = student['id']
-        
-        # Get all courses for this student
-        student_courses = {
-            'mandatory': [],
-            'elective': []
-        }
-        
-        for (sid, course_id), assignment in assignments.items():
-            if sid == student_id:
-                course = next(c for c in courses if c['id'] == course_id)
-                
-                if assignment['type'] == 'lab':
-                    # Course with lab
-                    section_id = assignment['section_id']
-                    section = next(s for s in lab_sections if s['id'] == section_id)
-                    
-                    course_info = {
-                        'course_id': course_id,
-                        'course_name': course['name'],
-                        'has_lab': True,
-                        'section_id': section_id,
-                        'lab_time': time_slots[section['time_slot']],
-                        'theory_time': time_slots[course['theory_time_slot']]
-                    }
-                else:
-                    # Course without lab
-                    course_info = {
-                        'course_id': course_id,
-                        'course_name': course['name'],
-                        'has_lab': False,
-                        'section_id': None,
-                        'lab_time': 'No Lab',
-                        'theory_time': time_slots[course['theory_time_slot']]
-                    }
-                
-                if course['type'] == 'mandatory':
-                    student_courses['mandatory'].append(course_info)
-                else:
-                    student_courses['elective'].append(course_info)
-        
-        # Format for display
-        mandatory_str = ", ".join([c['course_name'] for c in student_courses['mandatory']])
-        elective_str = ", ".join([c['course_name'] for c in student_courses['elective']])
-        
-        lab_times = []
-        for c in student_courses['mandatory'] + student_courses['elective']:
-            if c['has_lab']:
-                lab_times.append(f"{c['course_name']}: {c['lab_time']}")
-            else:
-                lab_times.append(f"{c['course_name']}: No Lab")
-        
-        theory_times = []
-        for c in student_courses['mandatory'] + student_courses['elective']:
-            theory_times.append(f"{c['course_name']}: {c['theory_time']}")
-        
-        results.append({
-            'Student ID': student_id,
-            'Name': student['name'],
-            'Program': student['program'],
-            'Mandatory Courses': mandatory_str,
-            'Elective Courses': elective_str,
-            'Lab Times': " | ".join(lab_times),
-            'Theory Class Times': " | ".join(theory_times)
-        })
-    
-    return pd.DataFrame(results) 
-
-
-
-def verify_assignment(assignments, data):
-    """Verify that all constraints are met in the assignment"""
-    print("\nVerifying constraints:")
-    all_constraints_met = True
-    
-    # 1. Check mandatory course constraint
-    mandatory_violations = []
-    for student in data['students']:
-        student_id = student['id']
-        program = student['program']
-        
-        # Get assigned courses for this student
-        assigned_courses = [course_id for (sid, course_id) in assignments.keys() if sid == student_id]
-        
-        # Check if all mandatory courses are assigned
-        for mandatory_course in data['mandatory_courses'][program]:
-            if mandatory_course not in assigned_courses:
-                mandatory_violations.append((student_id, mandatory_course))
-    
-    if mandatory_violations:
-        print(f"❌ Mandatory course constraint: {len(mandatory_violations)} violations")
-        all_constraints_met = False
-    else:
-        print("✅ Mandatory course constraint: All students have their mandatory courses")
-    
-    # 2. Check elective course constraint
-    elective_violations = []
-    for student in data['students']:
-        student_id = student['id']
-        program = student['program']
-        required_electives = data['max_electives'][program]
-        
-        # Count elective courses assigned to this student
-        assigned_courses = [course_id for (sid, course_id) in assignments.keys() if sid == student_id]
-        elective_courses = [cid for cid in assigned_courses 
-                          if next(c for c in data['courses'] if c['id'] == cid)['type'] == 'elective']
-        
-        if len(elective_courses) != required_electives:
-            elective_violations.append((student_id, len(elective_courses), required_electives))
-    
-    if elective_violations:
-        print(f"❌ Elective course constraint: {len(elective_violations)} violations")
-        all_constraints_met = False
-    else:
-        print("✅ Elective course constraint: All students have the correct number of electives")
-    
-    # 3. Check lab section capacity constraint
-    capacity_violations = []
-    for section in data['lab_sections']:
-        section_id = section['id']
-        
-        # Count students assigned to this section
-        assigned_students = [(sid, cid) for (sid, cid), assignment in assignments.items() 
-                           if assignment['type'] == 'lab' and assignment['section_id'] == section_id]
-        
-        if len(assigned_students) > data['lab_capacity']:
-            capacity_violations.append((section_id, len(assigned_students), data['lab_capacity']))
-    
-    if capacity_violations:
-        print(f"❌ Lab capacity constraint: {len(capacity_violations)} violations")
-        all_constraints_met = False
-    else:
-        print("✅ Lab capacity constraint: All lab sections within capacity limits")
-    
-    # 4. Check lab time conflict constraint
-    lab_conflict_violations = []
-    for student in data['students']:
-        student_id = student['id']
-        
-        # Get all lab time slots for this student
-        student_lab_slots = []
-        for (sid, cid), assignment in assignments.items():
-            if sid == student_id and assignment['type'] == 'lab':
-                section_id = assignment['section_id']
-                section = next(s for s in data['lab_sections'] if s['id'] == section_id)
-                student_lab_slots.append((section['time_slot'], section_id, cid))
-        
-        # Check for lab time conflicts
-        time_slot_count = {}
-        for time_slot, _, _ in student_lab_slots:
-            time_slot_count[time_slot] = time_slot_count.get(time_slot, 0) + 1
-        
-        conflicts = [(time_slot, count) for time_slot, count in time_slot_count.items() if count > 1]
-        if conflicts:
-            lab_conflict_violations.append((student_id, conflicts))
-    
-    if lab_conflict_violations:
-        print(f"❌ Lab time conflict constraint: {len(lab_conflict_violations)} violations")
-        all_constraints_met = False
-    else:
-        print("✅ Lab time conflict constraint: No lab time conflicts detected")
-    
-    # 5. Check theory class vs lab conflict constraint
-    theory_lab_conflicts = []
-    for student in data['students']:
-        student_id = student['id']
-        
-        # Get all assigned courses for this student
-        assigned_course_ids = [course_id for (sid, course_id) in assignments.keys() if sid == student_id]
-        assigned_courses = [next(c for c in data['courses'] if c['id'] == cid) for cid in assigned_course_ids]
-        
-        # Get all assigned lab sections for this student
-        assigned_labs = {}
-        for (sid, cid), assignment in assignments.items():
-            if sid == student_id and assignment['type'] == 'lab':
-                section_id = assignment['section_id']
-                section = next(s for s in data['lab_sections'] if s['id'] == section_id)
-                assigned_labs[cid] = section['time_slot']
-        
-        # Check for conflicts between theory times and lab times
-        for course in assigned_courses:
-            theory_time = course['theory_time_slot']
-            
-            # Check if this theory time conflicts with any other course's lab time
-            for other_cid, lab_time in assigned_labs.items():
-                if course['id'] != other_cid and theory_time == lab_time:
-                    theory_lab_conflicts.append((student_id, course['id'], other_cid))
-    
-    if theory_lab_conflicts:
-        print(f"❌ Theory-lab conflict constraint: {len(theory_lab_conflicts)} violations")
-        all_constraints_met = False
-    else:
-        print("✅ Theory-lab conflict constraint: No conflicts between theory classes and labs")
-    
-    return all_constraints_met
-
-def run_test(num_students=15, lab_capacity=3):
-    """Run a complete test of the two-phase course assignment algorithm"""
-    print(f"Generating test data with {num_students} students and lab capacity {lab_capacity}...")
-    data = generate_test_data(num_students=num_students, lab_capacity=lab_capacity)
-    
-    print(f"Students by program:")
-    for program in ['MPP', 'MDS', 'MIA']:
-        count = sum(1 for s in data['students'] if s['program'] == program)
-        print(f"  - {program}: {count} students")
-    
-    print(f"Courses:")
-    mandatory_with_lab = sum(1 for c in data['courses'] if c['type'] == 'mandatory' and c['has_lab'])
-    mandatory_without_lab = sum(1 for c in data['courses'] if c['type'] == 'mandatory' and not c['has_lab'])
-    elective_with_lab = sum(1 for c in data['courses'] if c['type'] == 'elective' and c['has_lab'])
-    elective_without_lab = sum(1 for c in data['courses'] if c['type'] == 'elective' and not c['has_lab'])
-    
-    print(f"  - Mandatory with lab: {mandatory_with_lab}")
-    print(f"  - Mandatory without lab: {mandatory_without_lab}")
-    print(f"  - Elective with lab: {elective_with_lab}")
-    print(f"  - Elective without lab: {elective_without_lab}")
-    print(f"Lab sections: {len(data['lab_sections'])}")
-    
-    print("\nRunning two-phase assignment algorithm...")
-    assignments, stats = two_phase_assignment(
-        data['students'], 
-        data['courses'], 
-        data['lab_sections'], 
-        data['course_preferences'],
-        data['lab_time_preferences'],
-        data['time_slots'], 
-        data['mandatory_courses'], 
-        data['max_electives'], 
-        data['lab_capacity']
-    )
-    
-    print(f"\nPhase 1 (Course Matching):")
-    print(f"  Status: {stats['phase1']['status']}")
-    print(f"  Course preference satisfaction: {stats['phase1']['avg_preference']:.2f}")
-    print(f"  Solving time: {stats['phase1']['solving_time']:.2f} seconds")
-    
-    print(f"\nPhase 2 (Time Matching):")
-    print(f"  Status: {stats['phase2']['status']}")
-    print(f"  Time preference satisfaction: {stats['phase2']['avg_preference']:.2f}")
-    print(f"  Solving time: {stats['phase2']['solving_time']:.2f} seconds")
-    
-    print(f"\nTotal solving time: {stats['total_solving_time']:.2f} seconds")
-    
-    # Verify the assignment
-    all_constraints_met = verify_assignment(assignments, data)
-    
-    if all_constraints_met:
-        print("\n✅ All constraints satisfied! The assignment is valid.")
-    else:
-        print("\n❌ Some constraints were violated. The assignment has issues.")
-    
-    # Format and display results
-    results_df = format_results(
-        assignments, 
-        data['students'], 
-        data['courses'], 
-        data['lab_sections'], 
-        data['time_slots']
-    )
-    
-    print("\nCourse Assignment Results:")
-    html_table = results_df.to_html(classes="table table-bordered", index=False)
-    
-    return html_table, assignments, stats, data
+def main():
+    # Run optimization
+    optimize_course_matching()
 
 if __name__ == "__main__":
-    # Run with 15 students and lab capacity of 3
-    results_df, assignments, stats, data = run_test(num_students=15, lab_capacity=3)
+    main()
+  
+
+  # Let S = {s₁, s₂, ..., sₙ} be the set of students
+# Let C = {c₁, c₂, ..., cₘ} be the set of courses
+# Let L = {l₁, l₂, ..., lₖ} be the set of lab sections
+# Let P = {(s, c, l, r) | s ∈ S, c ∈ C, l ∈ L, r ∈ ℕ} be the set of lab preferences
+
+# Decision Variables:
+# Y[s,l] ∈ {0, 1}
+# Y[s,l] = 1 if student s is assigned to lab section l
+# Y[s,l] = 0 otherwise
+
+# Preference Utility Function:
+# u(r) : ℕ → ℝ⁺
+# u(r) = max(10 - r, 1)
+# Where:
+#   r is the preference ranking
+#   u(r) transforms the ranking into a utility score
+
+# Objective Function:
+# max Z = ∑[s∈S, l∈L, c∈C] u(r[s,c,l]) * Y[s,l]
+
+# Constraints:
+
+# 1. Lab Assignment Constraint:
+#    ∀s ∈ S, ∀c ∈ C with lab:
+#        ∑[l∈L(c)] Y[s,l] = 1
+
+# 2. Lab Time Conflict Constraint:
+#    ∀s ∈ S, ∀(l₁, l₂) ∈ L with conflicting times:
+#        Y[s,l₁] + Y[s,l₂] ≤ 1
+
+# 3. Lab Capacity Constraint:
+#    ∀l ∈ L:
+#        ∑[s∈S] Y[s,l] ≤ capacity[l]
+
+# Detailed Description:
+
+# Objective Function Breakdown:
+# - Maximizes the total utility of lab assignments
+# - Calculates utility for each student-course-lab combination
+# - Utility depends on the student's preference ranking
+# - Higher preference (lower rank) gives higher utility
+# - Minimum utility is 1, maximum is 9
+
+# Preference Utility Function [u(r)]:
+# - Transforms preference ranking into a utility score
+# - For rank 1 (most preferred): u(1) = 9
+# - For rank 10 or higher: u(r) = 1
+# - Creates a non-linear utility scale that heavily rewards top preferences
+
+# Constraints Explanation:
+# - Lab Assignment: Ensures each course with a lab gets exactly one lab section per student
+# - Time Conflict: Prevents assigning conflicting lab times to the same student
+# - Capacity: Ensures no lab section exceeds its maximum capacity
+
+
+def load_data_second():
+    """
+    Load necessary data for lab matching optimization
+    """
+    # Load CSV files
+    student_course_matching = pd.read_csv('student_course_matching.csv')
+    lab_time_data = pd.read_csv('lab_time.csv')
+    day_data = pd.read_csv('day.csv')
+    pre_lab_ele_man_data = pd.read_csv('pre_lab_ele_man.csv')
+    theory_time_data = pd.read_csv('theory_time.csv')
+    course_data = pd.read_csv('course.csv')
+    
+    # Strip whitespace from column names and data
+    for df in [student_course_matching, lab_time_data, day_data, 
+               pre_lab_ele_man_data, theory_time_data, course_data]:
+        df.columns = df.columns.str.strip()
+        for col in df.select_dtypes(include=['object']).columns:
+            df[col] = df[col].str.strip()
+    
+    # Create day mapping
+    day_mapping = dict(zip(day_data['id_day'], day_data['day']))
+    
+    return (student_course_matching, lab_time_data, day_mapping, 
+            pre_lab_ele_man_data, theory_time_data, course_data)
+
+def check_time_conflict(day1, start1, end1, day2, start2, end2):
+    """
+    Check if two time slots conflict with each other.
+    """
+    if day1 != day2:
+        return False
+    try:
+        start1 = int(start1)
+        end1 = int(end1)
+        start2 = int(start2)
+        end2 = int(end2)
+        if end1 <= start2 or end2 <= start1:
+            return False
+        return True
+    except ValueError:
+        return False
+
+def optimize_lab_matching():
+    """
+    Optimize lab matching for students based on course matching and preferences
+    """
+    (student_course_matching, lab_time_data, day_mapping, 
+     pre_lab_ele_man_data, theory_time_data, course_data) = load_data_second()
+    
+    print("Initial Data Analysis:")
+    print("Total students in course matching:", len(student_course_matching['student_id'].unique()))
+    print("Total lab time entries:", len(lab_time_data))
+    
+    model = pulp.LpProblem("Lab_Matching", pulp.LpMaximize)
+
+    def calculate_utility(rank):
+        return max(10 - rank, 1)
+
+    students = student_course_matching['student_id'].unique()
+    lab_time_data['lab_id'] = lab_time_data.apply(
+        lambda x: f"{x['course_id']}-{x['lab']}", axis=1
+    )
+
+    Y = pulp.LpVariable.dicts("Y", 
+        [(s, l) for s in students for l in lab_time_data['lab_id']], 
+        cat=pulp.LpBinary
+    )
+
+    lab_utility = []
+    for _, pref in pre_lab_ele_man_data.iterrows():
+        student_id = pref['student_id']
+        course_id = pref['course_id']
+        lab_num = pref['lab']
+        lab_id = f"{course_id}-{lab_num}"
+
+        course_match = student_course_matching[
+            (student_course_matching['student_id'] == student_id) & 
+            (student_course_matching['course_id'] == course_id)
+        ]
+
+        course_has_lab = course_data[
+            (course_data['course_id'] == course_id) & 
+            (course_data['has_lab'] == 1)
+        ]
+
+        if not course_match.empty and not course_has_lab.empty and lab_id in lab_time_data['lab_id'].values:
+            utility = calculate_utility(pref['preference_rank'])
+            lab_utility.append(utility * Y[(student_id, lab_id)])
+
+    model += pulp.lpSum(lab_utility), "Lab Preference Utility"
+
+    for student_id in students:
+        student_courses = student_course_matching[
+            student_course_matching['student_id'] == student_id
+        ]
+        for _, course in student_courses.iterrows():
+            course_has_lab = course_data[
+                (course_data['course_id'] == course['course_id']) & 
+                (course_data['has_lab'] == 1)
+            ]
+            if not course_has_lab.empty:
+                possible_labs = lab_time_data[
+                    lab_time_data['course_id'] == course['course_id']
+                ]
+                course_lab_ids = [
+                    f"{course['course_id']}-{lab['lab']}" 
+                    for _, lab in possible_labs.iterrows()
+                ]
+                model += pulp.lpSum(Y[(student_id, l)] for l in course_lab_ids) == 1, \
+                    f"LabAssignment_{student_id}_{course['course_id']}"
+
+    lab_time_conflicts = []
+    for student_id in students:
+        student_courses_with_labs = student_course_matching[
+            (student_course_matching['student_id'] == student_id) & 
+            (student_course_matching['course_id'].isin(
+                course_data[course_data['has_lab'] == 1]['course_id']
+            ))
+        ]
+        lab_schedules = []
+        for _, course in student_courses_with_labs.iterrows():
+            course_labs = lab_time_data[lab_time_data['course_id'] == course['course_id']]
+            for _, lab in course_labs.iterrows():
+                lab_schedules.append({
+                    'course_id': lab['course_id'],
+                    'lab': lab['lab'],
+                    'day': day_mapping.get(lab['id_day'], 'Unknown'),
+                    'start_time': lab['start_time'],
+                    'end_time': lab['end_time']
+                })
+        for i in range(len(lab_schedules)):
+            for j in range(i+1, len(lab_schedules)):
+                lab1 = lab_schedules[i]
+                lab2 = lab_schedules[j]
+                if check_time_conflict(
+                    lab1['day'], lab1['start_time'], lab1['end_time'],
+                    lab2['day'], lab2['start_time'], lab2['end_time']
+                ):
+                    lab_id1 = f"{lab1['course_id']}-{lab1['lab']}"
+                    lab_id2 = f"{lab2['course_id']}-{lab2['lab']}"
+                    lab_time_conflicts.append((student_id, lab_id1, lab_id2))
+
+    for student_id, lab_id1, lab_id2 in lab_time_conflicts:
+        model += Y[(student_id, lab_id1)] + Y[(student_id, lab_id2)] <= 1, \
+            f"LabTimeConflict_{student_id}_{lab_id1}_{lab_id2}"
+
+    model.solve()
+    print("\nSolver Status:", pulp.LpStatus[model.status])
+
+    if pulp.LpStatus[model.status] not in ['Optimal', 'Feasible']:
+        print("Could not find a solution.")
+        return None
+
+    results = []
+    for student_id in students:
+        student_courses = student_course_matching[
+            student_course_matching['student_id'] == student_id
+        ]
+        student_name = student_courses['student_name'].iloc[0]
+
+        for _, course in student_courses.iterrows():
+            theory_time = theory_time_data[theory_time_data['course_id'] == course['course_id']]
+            lab_day = lab_start_time = lab_end_time = 'N/A'
+            course_info = course_data[course_data['course_id'] == course['course_id']]
+            has_lab = course_info['has_lab'].iloc[0] if not course_info.empty else 0
+
+            if has_lab == 1:
+                course_labs = lab_time_data[lab_time_data['course_id'] == course['course_id']]
+                for _, lab in course_labs.iterrows():
+                    lab_id = f"{lab['course_id']}-{lab['lab']}"
+                    if Y[(student_id, lab_id)].value() > 0.5:
+                        lab_day = day_mapping.get(lab['id_day'], 'Unknown')
+                        lab_start_time = lab['start_time']
+                        lab_end_time = lab['end_time']
+                        break
+
+            results.append({
+                'student_id': student_id,
+                'student_name': student_name,
+                'course_id': course['course_id'],
+                'course_name': course['course_name'],
+                'course_type': course['course_type'],
+                'theory_day': day_mapping.get(theory_time['id_day'].iloc[0], 'Unknown') if not theory_time.empty else 'N/A',
+                'theory_start_time': theory_time['start_time'].iloc[0] if not theory_time.empty else 'N/A',
+                'theory_end_time': theory_time['end_time'].iloc[0] if not theory_time.empty else 'N/A',
+                'lab_day': lab_day,
+                'lab_start_time': lab_start_time,
+                'lab_end_time': lab_end_time
+            })
+
+    results_df = pd.DataFrame(results)
+    results_df.to_csv('student_lab_matching.csv', index=False)
+    print("Course matching completed. Results saved to student_lab_matching.csv")
+    return results_df
+
+def main():
+    optimize_lab_matching()
+
+if __name__ == "__main__":
+    main()
+
+'''
+#gale-shapely
+import pandas as pd
+from collections import defaultdict
+
+def load_data():
+    """Load necessary CSV files for course matching."""
+    # Load CSV files
+    course_data = pd.read_csv('course.csv')
+    student_data = pd.read_csv('student.csv')
+    elective_capacity_data = pd.read_csv('elective_capacity.csv')
+    elective_preference_data = pd.read_csv('elective_preference.csv')
+    
+    # Strip whitespace from column names
+    course_data.columns = course_data.columns.str.strip()
+    student_data.columns = student_data.columns.str.strip()
+    elective_capacity_data.columns = elective_capacity_data.columns.str.strip()
+    elective_preference_data.columns = elective_preference_data.columns.str.strip()
+    
+    # Strip whitespace from string columns
+    for df in [course_data, student_data, elective_capacity_data, elective_preference_data]:
+        for col in df.select_dtypes(include=['object']).columns:
+            df[col] = df[col].str.strip()
+    
+    return course_data, student_data, elective_capacity_data, elective_preference_data
+
+def gale_shapley_course_matching():
+    """
+    Optimize course matching for students using Gale-Shapley algorithm
+    with Preference Strength Priority for courses.
+    """
+    # Load data
+    course_data, student_data, elective_capacity_data, elective_preference_data = load_data()
+    
+    # Create a result container
+    results = []
+    
+    # First, assign all mandatory courses
+    for _, student in student_data.iterrows():
+        student_id = student['student_id']
+        program_id = student['program_id']
+        
+        # Identify mandatory courses for this student's program
+        mandatory_courses = course_data[
+            (course_data['program_id'] == program_id) & 
+            (course_data['mandatory'] == 1)
+        ]
+        
+        # Assign all mandatory courses
+        for _, course in mandatory_courses.iterrows():
+            results.append({
+                'student_id': student_id,
+                'student_name': student['name'],
+                'course_type': 'Mandatory',
+                'course_id': course['course_id'],
+                'course_name': course['course_name']
+            })
+    
+    # Now, handle elective courses using Gale-Shapley
+    
+    # 1. Calculate preference priority scores
+    max_rank = elective_preference_data['preference_rank'].max()
+    priority_lookup = {}
+    for _, pref in elective_preference_data.iterrows():
+        student_id = pref['student_id']
+        course_id = pref['course_id']
+        rank = pref['preference_rank']
+        priority = (max_rank + 1) - rank
+        priority_lookup[(course_id, student_id)] = priority
+    
+    # 2. Prepare data structures for Gale-Shapley
+    students_needing_electives = []
+    for _, student in student_data.iterrows():
+        student_id = student['student_id']
+        required_electives = student['required_electives']
+        
+        if required_electives > 0:
+            students_needing_electives.append({
+                'student_id': student_id,
+                'program_id': student['program_id'],
+                'required_electives': required_electives,
+                'assigned_electives': 0
+            })
+    
+    student_preferences = {}
+    for student in students_needing_electives:
+        student_id = student['student_id']
+        program_id = student['program_id']
+        
+        eligible_courses = course_data[
+            (course_data['program_id'] == program_id) & 
+            (course_data['mandatory'] == 0)
+        ]['course_id'].tolist()
+        
+        student_prefs = elective_preference_data[
+            (elective_preference_data['student_id'] == student_id) & 
+            (elective_preference_data['course_id'].isin(eligible_courses))
+        ].sort_values('preference_rank')
+        
+        student_preferences[student_id] = student_prefs['course_id'].tolist()
+    
+    course_capacities = {}
+    for _, capacity in elective_capacity_data.iterrows():
+        course_capacities[capacity['course_id']] = capacity['capacity']
+    
+    course_assignments = defaultdict(list)
+    student_assignments = defaultdict(list)
+    
+    unmatched_students = [s['student_id'] for s in students_needing_electives]
+    proposed_to = defaultdict(set)
+    
+    while unmatched_students:
+        student_id = unmatched_students.pop(0)
+        student_data_row = next(s for s in students_needing_electives if s['student_id'] == student_id)
+        
+        if student_data_row['assigned_electives'] >= student_data_row['required_electives']:
+            continue
+        
+        preferences = student_preferences.get(student_id, [])
+        next_preferences = [c for c in preferences if c not in proposed_to[student_id]]
+        
+        if not next_preferences:
+            continue
+        
+        course_id = next_preferences[0]
+        proposed_to[student_id].add(course_id)
+        
+        if len(course_assignments[course_id]) < course_capacities.get(course_id, 0):
+            course_assignments[course_id].append(student_id)
+            student_assignments[student_id].append(course_id)
+            student_data_row['assigned_electives'] += 1
+            
+            if student_data_row['assigned_electives'] < student_data_row['required_electives']:
+                unmatched_students.append(student_id)
+        else:
+            current_assignees = course_assignments[course_id]
+            all_students = current_assignees + [student_id]
+            priorities = [(s, priority_lookup.get((course_id, s), 0)) for s in all_students]
+            priorities.sort(key=lambda x: x[1], reverse=True)
+            
+            capacity = course_capacities.get(course_id, 0)
+            selected_students = [s for s, _ in priorities[:capacity]]
+            
+            if student_id in selected_students:
+                bumped_students = [s for s in current_assignees if s not in selected_students]
+                course_assignments[course_id] = selected_students
+                student_assignments[student_id].append(course_id)
+                student_data_row['assigned_electives'] += 1
+                
+                if student_data_row['assigned_electives'] < student_data_row['required_electives']:
+                    unmatched_students.append(student_id)
+                
+                for bumped in bumped_students:
+                    bumped_data = next(s for s in students_needing_electives if s['student_id'] == bumped)
+                    student_assignments[bumped].remove(course_id)
+                    bumped_data['assigned_electives'] -= 1
+                    unmatched_students.append(bumped)
+            else:
+                unmatched_students.append(student_id)
+    
+    for student_id, courses in student_assignments.items():
+        student_name = student_data[student_data['student_id'] == student_id]['name'].iloc[0]
+        
+        for course_id in courses:
+            course_name = course_data[course_data['course_id'] == course_id]['course_name'].iloc[0]
+            results.append({
+                'student_id': student_id,
+                'student_name': student_name,
+                'course_type': 'Elective',
+                'course_id': course_id,
+                'course_name': course_name
+            })
+    
+    results_df = pd.DataFrame(results)
+    results_df['course_type_order'] = results_df['course_type'].apply(lambda x: 0 if x == 'Mandatory' else 1)
+    results_df = results_df.sort_values(by=['student_id', 'course_type_order'])
+    results_df = results_df.drop('course_type_order', axis=1)
+    results_df.to_csv('student_course_matching_gale_shapley.csv', index=False)
+    
+    print("Course matching completed using Gale-Shapley algorithm. Results saved to student_course_matching_gale_shapley.csv")
+    return results_df
+
+def main():
+    gale_shapley_course_matching()
+
+if __name__ == "__main__":
+    main()
+
+#Overview of the Implementation
+
+#Mandatory Course Assignment:
+#- First assigns all mandatory courses automatically, just like in your original code
+#- Only applies the matching algorithm to elective courses
+
+#Preference Priority System:
+#- Calculates priority scores using the formula: priority = (max_rank + 1) - rank
+#- Creates a lookup dictionary for quick access to priority scores during matching
+
+#Data Preparation:
+#- Builds preference lists for each student
+#- Tracks course capacities
+#- Only includes eligible courses for each student based on their program
+
+#Students "propose" to courses in order of their preferences
+#- Courses accept students based on preference priorities
+#- If a course is full, it compares the new student with currently assigned students
+#- Students who need multiple electives can be re-added to the queue
+
+
+#Lab matching completed using Gale-Shapley algorithm. Results saved to student_lab_matching_gale_shapley.csv\n"
+    
+import pandas as pd
+from collections import defaultdict
+
+def load_data():
+    """
+    Load necessary data for lab matching optimization
+    """
+    # Load CSV files
+    student_course_matching = pd.read_csv('student_course_matching_gale_shapley.csv')
+    lab_time_data = pd.read_csv('lab_time.csv')
+    day_data = pd.read_csv('day.csv')
+    pre_lab_ele_man_data = pd.read_csv('pre_lab_ele_man.csv')
+    theory_time_data = pd.read_csv('theory_time.csv')
+    course_data = pd.read_csv('course.csv')
+    
+    # Strip whitespace from column names and data
+    for df in [student_course_matching, lab_time_data, day_data, 
+               pre_lab_ele_man_data, theory_time_data, course_data]:
+        df.columns = df.columns.str.strip()
+        for col in df.select_dtypes(include=['object']).columns:
+            df[col] = df[col].str.strip()
+    
+    # Create day mapping
+    day_mapping = dict(zip(day_data['id_day'], day_data['day']))
+    
+    return (student_course_matching, lab_time_data, day_mapping, 
+            pre_lab_ele_man_data, theory_time_data, course_data)
+
+def check_time_conflict(day1, start1, end1, day2, start2, end2):
+    """
+    Check if two time slots conflict with each other.
+    """
+    if day1 != day2:
+        return False
+    try:
+        start1 = int(start1)
+        end1 = int(end1)
+        start2 = int(start2)
+        end2 = int(end2)
+        if end1 <= start2 or end2 <= start1:
+            return False
+        return True
+    except ValueError:
+        return False
+
+def gale_shapley_lab_matching():
+    """
+    Optimize lab matching for students using Gale-Shapley algorithm
+    """
+    (student_course_matching, lab_time_data, day_mapping, 
+     pre_lab_ele_man_data, theory_time_data, course_data) = load_data()
+    
+    print("Initial Data Analysis:")
+    print("Total students in course matching:", len(student_course_matching['student_id'].unique()))
+    print("Total lab time entries:", len(lab_time_data))
+    
+    students = student_course_matching['student_id'].unique()
+    
+    lab_time_data['lab_id'] = lab_time_data.apply(
+        lambda x: f"{x['course_id']}-{x['lab']}", axis=1
+    )
+    
+    max_rank = pre_lab_ele_man_data['preference_rank'].max() if not pre_lab_ele_man_data.empty else 5
+    priority_lookup = {}
+    for _, pref in pre_lab_ele_man_data.iterrows():
+        student_id = pref['student_id']
+        course_id = pref['course_id']
+        lab_num = pref['lab']
+        lab_id = f"{course_id}-{lab_num}"
+        rank = pref['preference_rank']
+        priority = (max_rank + 1) - rank
+        priority_lookup[(lab_id, student_id)] = priority
+    
+    student_preferences = defaultdict(dict)
+    for student_id in students:
+        student_courses = student_course_matching[student_course_matching['student_id'] == student_id]
+        for _, course in student_courses.iterrows():
+            course_id = course['course_id']
+            course_has_lab = course_data[
+                (course_data['course_id'] == course_id) & 
+                (course_data['has_lab'] == 1)
+            ]
+            if not course_has_lab.empty:
+                possible_labs = lab_time_data[lab_time_data['course_id'] == course_id]
+                course_lab_ids = [f"{course_id}-{lab['lab']}" for _, lab in possible_labs.iterrows()]
+                student_prefs = pre_lab_ele_man_data[
+                    (pre_lab_ele_man_data['student_id'] == student_id) & 
+                    (pre_lab_ele_man_data['course_id'] == course_id)
+                ]
+                if not student_prefs.empty:
+                    lab_prefs = student_prefs.sort_values('preference_rank')
+                    preferred_lab_ids = [f"{course_id}-{lab['lab']}" for _, lab in lab_prefs.iterrows()]
+                    for lab_id in course_lab_ids:
+                        if lab_id not in preferred_lab_ids:
+                            preferred_lab_ids.append(lab_id)
+                else:
+                    preferred_lab_ids = course_lab_ids
+                student_preferences[student_id][course_id] = preferred_lab_ids
+    
+    lab_assignments = defaultdict(list)
+    student_lab_assignments = defaultdict(dict)
+    lab_capacities = {f"{lab['course_id']}-{lab['lab']}": 30 for _, lab in lab_time_data.iterrows()}
+    
+    courses_with_labs = {}
+    for student_id in students:
+        student_courses = student_course_matching[student_course_matching['student_id'] == student_id]
+        lab_courses = []
+        for _, course in student_courses.iterrows():
+            course_has_lab = course_data[
+                (course_data['course_id'] == course['course_id']) & 
+                (course_data['has_lab'] == 1)
+            ]
+            if not course_has_lab.empty:
+                lab_courses.append(course['course_id'])
+        courses_with_labs[student_id] = lab_courses
+    
+    unmatched_queue = [(student_id, course_id) for student_id, course_ids in courses_with_labs.items() for course_id in course_ids]
+    proposed_to = defaultdict(lambda: defaultdict(set))
+    
+    while unmatched_queue:
+        student_id, course_id = unmatched_queue.pop(0)
+        if course_id in student_lab_assignments[student_id]:
+            continue
+        preferences = student_preferences[student_id].get(course_id, [])
+        next_labs = [lab_id for lab_id in preferences if lab_id not in proposed_to[student_id][course_id]]
+        if not next_labs:
+            print(f"Warning: Student {student_id} has no more lab preferences for course {course_id}")
+            continue
+        lab_id = next_labs[0]
+        proposed_to[student_id][course_id].add(lab_id)
+        lab_info = lab_time_data[lab_time_data['lab_id'] == lab_id].iloc[0]
+        lab_day = day_mapping.get(lab_info['id_day'], 'Unknown')
+        lab_start = lab_info['start_time']
+        lab_end = lab_info['end_time']
+        has_conflict = False
+        for other_course_id, assigned_lab_id in student_lab_assignments[student_id].items():
+            other_lab_info = lab_time_data[lab_time_data['lab_id'] == assigned_lab_id].iloc[0]
+            other_day = day_mapping.get(other_lab_info['id_day'], 'Unknown')
+            other_start = other_lab_info['start_time']
+            other_end = other_lab_info['end_time']
+            if check_time_conflict(lab_day, lab_start, lab_end, other_day, other_start, other_end):
+                has_conflict = True
+                break
+        if has_conflict:
+            unmatched_queue.append((student_id, course_id))
+            continue
+        if len(lab_assignments[lab_id]) < lab_capacities.get(lab_id, 0):
+            lab_assignments[lab_id].append(student_id)
+            student_lab_assignments[student_id][course_id] = lab_id
+        else:
+            current_assignees = lab_assignments[lab_id]
+            all_students = current_assignees + [student_id]
+            priorities = [(s, priority_lookup.get((lab_id, s), 0)) for s in all_students]
+            priorities.sort(key=lambda x: (x[1], x[0]), reverse=True)
+            capacity = lab_capacities.get(lab_id, 0)
+            selected_students = [s for s, _ in priorities[:capacity]]
+            if student_id in selected_students:
+                bumped_students = [s for s in current_assignees if s not in selected_students]
+                lab_assignments[lab_id] = selected_students
+                student_lab_assignments[student_id][course_id] = lab_id
+                for bumped in bumped_students:
+                    bumped_course = next((c for c, l in student_lab_assignments[bumped].items() if l == lab_id), None)
+                    if bumped_course:
+                        del student_lab_assignments[bumped][bumped_course]
+                        unmatched_queue.append((bumped, bumped_course))
+            else:
+                unmatched_queue.append((student_id, course_id))
+    
+    results = []
+    for student_id in students:
+        student_courses = student_course_matching[student_course_matching['student_id'] == student_id]
+        student_name = student_courses['student_name'].iloc[0]
+        for _, course in student_courses.iterrows():
+            course_id = course['course_id']
+            theory_time = theory_time_data[theory_time_data['course_id'] == course_id]
+            lab_day = 'N/A'
+            lab_start_time = 'N/A'
+            lab_end_time = 'N/A'
+            course_info = course_data[course_data['course_id'] == course_id]
+            has_lab = course_info['has_lab'].iloc[0] if not course_info.empty else 0
+            if has_lab == 1:
+                assigned_lab_id = student_lab_assignments[student_id].get(course_id)
+                if assigned_lab_id:
+                    lab_info = lab_time_data[lab_time_data['lab_id'] == assigned_lab_id].iloc[0]
+                    lab_day = day_mapping.get(lab_info['id_day'], 'Unknown')
+                    lab_start_time = lab_info['start_time']
+                    lab_end_time = lab_info['end_time']
+            results.append({
+                'student_id': student_id,
+                'student_name': student_name,
+                'course_id': course_id,
+                'course_name': course['course_name'],
+                'course_type': course['course_type'],
+                'theory_day': day_mapping.get(theory_time['id_day'].iloc[0], 'Unknown') if not theory_time.empty else 'N/A',
+                'theory_start_time': theory_time['start_time'].iloc[0] if not theory_time.empty else 'N/A',
+                'theory_end_time': theory_time['end_time'].iloc[0] if not theory_time.empty else 'N/A',
+                'lab_day': lab_day,
+                'lab_start_time': lab_start_time,
+                'lab_end_time': lab_end_time
+            })
+    
+    missing_labs = []
+    for student_id in students:
+        for course_id in courses_with_labs.get(student_id, []):
+            if course_id not in student_lab_assignments[student_id]:
+                missing_labs.append((student_id, course_id))
+    
+    if missing_labs:
+        print(f"Warning: {len(missing_labs)} student-course pairs still need lab assignments")
+        print("First few missing assignments:", missing_labs[:5])
+    
+    results_df = pd.DataFrame(results)
+    results_df = results_df.sort_values(by=['student_id', 'course_id'])
+    results_df.to_csv('student_lab_matching_gale_shapley.csv', index=False)
+    
+    print("Lab matching completed using Gale-Shapley algorithm. Results saved to student_lab_matching_gale_shapley.csv")
+    return results_df
+
+def main():
+    gale_shapley_lab_matching()
+
+if __name__ == "__main__":
+    main()
+
+  #Key Features of the Solution:
+
+#Preference-Based Priority System:
+
+#Uses student preferences for lab sections from the pre_lab_ele_man_data table
+#Calculates priority scores based on preference rankings
+
+
+#Multiple Constraint Handling:
+
+#Lab Time Conflicts: Checks for conflicts between lab times before making assignments
+#Course-Lab Association: Students are only assigned to labs for courses they're taking
+#Lab Capacity: Ensures labs don't exceed capacity
+
+
+#Modified Gale-Shapley Algorithm:
+
+#Students "propose" to labs in order of their preferences
+#Labs accept students based on priority scores with student ID as tie-breaker
+#If a lab is full, it may bump lower-priority students
+
+
+#Comprehensive Output:
+
+#Includes theory and lab times for all courses
+#Reports any students who couldn't be assigned to labs
+
+'''

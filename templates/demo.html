@@ -8,16 +8,17 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            margin-top: 50px;
+            margin: 50px;
         }
         h1 {
             color: #333;
         }
         h2 {
             color: #555;
+            margin-top: 40px;
         }
         .logo {
-            width: 150px; /* Adjust size as needed */
+            width: 150px;
             height: auto;
             margin-bottom: 20px;
         }
@@ -36,7 +37,7 @@
             border-radius: 5px;
         }
         main {
-           margin-top: 50px; /* Adjust spacing as needed */
+            margin-top: 50px;
         }
         footer {
             margin-top: 50px;
@@ -53,7 +54,55 @@
             font-size: 1em;
             color: #555;
         }
-
+        .table-container {
+            margin: 30px auto;
+            width: 90%;
+            overflow-x: auto;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: auto;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #ba0020;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #ba0020;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #90001a;
+        }
+        a.button-link {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: white;
+            background-color: #555;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+        a.button-link:hover {
+            background-color: #333;
+        }
     </style>
 </head>
 <body>
@@ -66,26 +115,21 @@
         <a href="{{ url_for('about') }}">About</a>
     </nav>
 
-    <h1>Here You Can Run a Demonstration of Our Student Matching Algorithm</h1>
+    <h1>Student Matching Algorithm</h1>
 
     <form method="POST" action="{{ url_for('demo') }}">
-        <label for="num_students">Number of Students:</label>
-        <input type="number" id="num_students" name="num_students" min="1" value="15" required>
-    
-        <label for="lab_capacity">Lab Capacity:</label>
-        <input type="number" id="lab_capacity" name="lab_capacity" min="1" value="3" required>
-    
+        <label for="num_students">Consult Current Students in Database</label>
         <br><br>
-        <button type="submit">Run Test</button>
+        <button type="submit">Click Here</button>
     </form>
 
-    {% if output %}
+    {% if output is not none %}
         <h2>Results:</h2>
-        <div class="table-responsive">
+        <div class="table-container">
             {{ output|safe }}
         </div>
     {% endif %}
 
-    <a href="{{ url_for('home') }}">Back</a>
+    <a class="button-link" href="{{ url_for('home') }}">Back</a>
 </body>
 </html>

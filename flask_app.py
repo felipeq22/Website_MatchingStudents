@@ -7,7 +7,8 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import threading
 import webbrowser
-import algorithm 
+import algorithm
+import pandas as pd 
 
 #Create a Flask app
 app = Flask(__name__)
@@ -56,14 +57,8 @@ def demo():
     output = None
     if request.method == 'POST':
         try:
-            num_students = int(request.form.get('num_students', 15))
-            lab_capacity = int(request.form.get('lab_capacity', 3))
-
-            output, assignments, stats, data = algorithm.run_test(
-                num_students=num_students,
-                lab_capacity=lab_capacity
-            )
-            
+            df = pd.read_csv('backend/student.csv')
+            output = df.to_html(classes='table table-bordered', index=False)
         except Exception as e:
             output = f"<p style='color:red;'>Error: {str(e)}</p>"
             
