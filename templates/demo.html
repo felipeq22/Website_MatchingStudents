@@ -128,6 +128,11 @@
         <div class="table-container">
             {{ output|safe }}
         </div>
+    
+        <br>
+        <form method="GET" action="{{ url_for('student_demo') }}">
+            <button type="submit">Add New Student</button>
+        </form>
     {% endif %}
 
     <a class="button-link" href="{{ url_for('home') }}">Back</a>

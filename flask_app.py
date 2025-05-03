@@ -58,6 +58,19 @@ def demo():
     if request.method == 'POST':
         try:
             df = pd.read_csv('backend/student.csv')
+            
+            student_name = request.form.get('student_name')
+            program = request.form.get('program')
+            
+            if student_name and program:
+                
+                last_id =df['student_id'].iloc[-1]
+                new_row = [last_id + 1, student_name , program, 1, 2]
+                new_df = pd.DataFrame([new_row], columns = df.columns)
+                df = pd.concat([df, new_df], ignore_index=True)
+
+                df.to_csv('backend/student.csv', index=False)
+            
             output = df.to_html(classes='table table-bordered', index=False)
         except Exception as e:
             output = f"<p style='color:red;'>Error: {str(e)}</p>"
