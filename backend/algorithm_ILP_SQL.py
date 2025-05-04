@@ -73,7 +73,7 @@ def load_csvs_to_db(csv_folder_path, db_name="student_matching.db"):
         "pre_lab_ele_man.csv": "pre_lab_ele_man",
         "program.csv": "program",
         "student.csv": "student",
-        "theory.csv": "theory_time"
+        "theory_time.csv": "theory_time"
     }
 
     # Create connection to the SQLite database
@@ -87,6 +87,8 @@ def load_csvs_to_db(csv_folder_path, db_name="student_matching.db"):
     conn.commit()
     conn.close()
     print(f"All tables loaded into {db_name}")
+
+
 
 def load_data_first():
     """
@@ -292,7 +294,7 @@ def load_data_second():
     lab_time_data = pd.read_sql_query("SELECT * FROM lab_time", conn)
     day_data = pd.read_sql_query("SELECT * FROM day", conn)
     pre_lab_ele_man_data = pd.read_sql_query("SELECT * FROM pre_lab_ele_man", conn)
-    theory_time_data = pd.read_sql_query("SELECT * FROM theory_time", conn)
+    theory_time_data = pd.read_sql_query("SELECT * FROM theory", conn)
     course_data = pd.read_sql_query("SELECT * FROM course", conn)
 
     # Clean up whitespace
