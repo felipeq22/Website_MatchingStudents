@@ -108,6 +108,7 @@ def load_data_first():
     conn.close()
     return course_data, student_data, elective_capacity_data, elective_preference_data
 
+
 def optimize_course_matching():
     """
     Optimize course matching for students
@@ -123,14 +124,9 @@ def optimize_course_matching():
     courses = course_data['course_id'].tolist()
     
     # Decision variables
-    # X[s,c] = 1 if student s is assigned to course c, 0 otherwise
     X = pulp.LpVariable.dicts("X", 
                              [(s, c) for s in students for c in courses], 
                              cat=pulp.LpBinary)
-    
-    # Objective function: utility based on preference ranking
-    def calculate_utility(rank):
-        return max(10 - rank, 1)
     
     # Preference utility
     preference_utility = []
@@ -149,13 +145,11 @@ def optimize_course_matching():
         student_id = student['student_id']
         program_id = student['program_id']
         
-        # Identify mandatory courses for this student's program
         mandatory_courses = course_data[
             (course_data['program_id'] == program_id) & 
             (course_data['mandatory'] == 1)
         ]['course_id'].tolist()
         
-        # Ensure all mandatory courses are assigned
         for course_id in mandatory_courses:
             model += X[(student_id, course_id)] == 1, f"Mandatory_{student_id}_{course_id}"
     
@@ -165,13 +159,11 @@ def optimize_course_matching():
         program_id = student['program_id']
         required_electives = student['required_electives']
         
-        # Identify elective courses for this student's program
         elective_courses = course_data[
             (course_data['program_id'] == program_id) & 
             (course_data['mandatory'] == 0)
         ]['course_id'].tolist()
         
-        # Ensure exact number of electives are assigned
         if elective_courses:
             model += pulp.lpSum(X[(student_id, c)] for c in elective_courses) == required_electives, f"ElectiveLimit_{student_id}"
     
@@ -185,30 +177,26 @@ def optimize_course_matching():
     # Solve the model
     model.solve()
     
-    # Check solution status
     if pulp.LpStatus[model.status] != 'Optimal':
         print("Could not find an optimal solution.")
         return None
     
-    # Extract results
+    # Prepare results
     results = []
     for _, student in student_data.iterrows():
         student_id = student['student_id']
         program_id = student['program_id']
         
-        # Find mandatory courses
         mandatory_courses = course_data[
             (course_data['program_id'] == program_id) & 
             (course_data['mandatory'] == 1)
         ]
         
-        # Find elective courses
         elective_courses = course_data[
             (course_data['program_id'] == program_id) & 
             (course_data['mandatory'] == 0)
         ]
         
-        # Track assigned courses
         for _, course in mandatory_courses.iterrows():
             if X[(student_id, course['course_id'])].value() > 0.5:
                 results.append({
@@ -229,20 +217,28 @@ def optimize_course_matching():
                     'course_name': course['course_name']
                 })
     
-    # Convert to DataFrame and export
+    # Convert to DataFrame
     results_df = pd.DataFrame(results)
-    results_df.to_csv('student_course_matching.csv', index=False)
     
-    print("Course matching completed. Results saved to student_course_matching.csv")
+    # Save to the SQLite database
+    conn = sqlite3.connect('student_matching.db')
+    
+    # Check if the table exists before inserting
+    table_check_query = "SELECT name FROM sqlite_master WHERE type='table' AND name='student_course_matching';"
+    table_check = pd.read_sql_query(table_check_query, conn)
+    
+    if not table_check.empty:
+        print("Table 'student_course_matching' already exists. Replacing existing data.")
+    else:
+        print("Table 'student_course_matching' does not exist. Creating new table.")
+    
+    # Insert or replace the table with new data
+    results_df.to_sql('student_course_matching', conn, if_exists='replace', index=False)
+    
+    conn.close()
+    
+    print("Course matching completed. Results saved to student_course_matching table.")
     return results_df
-
-def main():
-    # Run optimization
-    optimize_course_matching()
-
-if __name__ == "__main__":
-    main()
-  
 
   # Let S = {s₁, s₂, ..., sₙ} be the set of students
 # Let C = {c₁, c₂, ..., cₘ} be the set of courses
