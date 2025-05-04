@@ -73,7 +73,7 @@ def load_csvs_to_db(csv_folder_path, db_name="student_matching.db"):
         "pre_lab_ele_man.csv": "pre_lab_ele_man",
         "program.csv": "program",
         "student.csv": "student",
-        "theory_time.csv": "theory"
+        "theory.csv": "theory_time"
     }
 
     # Create connection to the SQLite database
@@ -109,9 +109,10 @@ def load_data_first():
     return course_data, student_data, elective_capacity_data, elective_preference_data
 
 
+
 def optimize_course_matching():
     """
-    Optimize course matching for students
+    Optimize course matching for students and save results to SQLite instead of CSV.
     """
     # Load data
     course_data, student_data, elective_capacity_data, elective_preference_data = load_data_first()
@@ -128,6 +129,10 @@ def optimize_course_matching():
                              [(s, c) for s in students for c in courses], 
                              cat=pulp.LpBinary)
     
+    # Objective function: utility based on preference ranking
+    def calculate_utility(rank):
+        return max(10 - rank, 1)
+    
     # Preference utility
     preference_utility = []
     for _, pref in elective_preference_data.iterrows():
@@ -140,7 +145,6 @@ def optimize_course_matching():
     model += pulp.lpSum(preference_utility), "Preference Utility"
     
     # Constraints
-    # 1. Mandatory course constraints
     for _, student in student_data.iterrows():
         student_id = student['student_id']
         program_id = student['program_id']
@@ -152,13 +156,8 @@ def optimize_course_matching():
         
         for course_id in mandatory_courses:
             model += X[(student_id, course_id)] == 1, f"Mandatory_{student_id}_{course_id}"
-    
-    # 2. Elective course constraints
-    for _, student in student_data.iterrows():
-        student_id = student['student_id']
-        program_id = student['program_id']
-        required_electives = student['required_electives']
         
+        required_electives = student['required_electives']
         elective_courses = course_data[
             (course_data['program_id'] == program_id) & 
             (course_data['mandatory'] == 0)
@@ -167,7 +166,6 @@ def optimize_course_matching():
         if elective_courses:
             model += pulp.lpSum(X[(student_id, c)] for c in elective_courses) == required_electives, f"ElectiveLimit_{student_id}"
     
-    # 3. Elective course capacity constraints
     for _, capacity in elective_capacity_data.iterrows():
         course_id = capacity['course_id']
         max_capacity = capacity['capacity']
@@ -181,7 +179,7 @@ def optimize_course_matching():
         print("Could not find an optimal solution.")
         return None
     
-    # Prepare results
+    # Extract results
     results = []
     for _, student in student_data.iterrows():
         student_id = student['student_id']
@@ -220,25 +218,14 @@ def optimize_course_matching():
     # Convert to DataFrame
     results_df = pd.DataFrame(results)
     
-    # Save to the SQLite database
+    # Save to SQLite instead of CSV
     conn = sqlite3.connect('student_matching.db')
-    
-    # Check if the table exists before inserting
-    table_check_query = "SELECT name FROM sqlite_master WHERE type='table' AND name='student_course_matching';"
-    table_check = pd.read_sql_query(table_check_query, conn)
-    
-    if not table_check.empty:
-        print("Table 'student_course_matching' already exists. Replacing existing data.")
-    else:
-        print("Table 'student_course_matching' does not exist. Creating new table.")
-    
-    # Insert or replace the table with new data
     results_df.to_sql('student_course_matching', conn, if_exists='replace', index=False)
-    
     conn.close()
     
     print("Course matching completed. Results saved to student_course_matching table.")
     return results_df
+
 
   # Let S = {s₁, s₂, ..., sₙ} be the set of students
 # Let C = {c₁, c₂, ..., cₘ} be the set of courses
