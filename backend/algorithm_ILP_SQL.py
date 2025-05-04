@@ -331,7 +331,10 @@ def check_time_conflict(day1, start1, end1, day2, start2, end2):
 def optimize_lab_matching():
     """
     Optimize lab matching for students based on course matching and preferences
+    and save results to the SQLite database.
     """
+    import sqlite3
+
     (student_course_matching, lab_time_data, day_mapping, 
      pre_lab_ele_man_data, theory_time_data, course_data) = load_data_second()
     
@@ -478,11 +481,11 @@ def optimize_lab_matching():
 
     results_df = pd.DataFrame(results)
     results_df.to_csv('student_lab_matching.csv', index=False)
-    print("Course matching completed. Results saved to student_lab_matching.csv")
+
+    # Save to SQLite database
+    conn = sqlite3.connect('matching.db')
+    results_df.to_sql('student_lab_matching', conn, if_exists='replace', index=False)
+    conn.close()
+
+    print("Lab matching completed. Results saved to student_lab_matching.csv and matching.db")
     return results_df
-
-def main():
-    optimize_lab_matching()
-
-if __name__ == "__main__":
-    main()
