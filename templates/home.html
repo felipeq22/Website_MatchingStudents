@@ -16,6 +16,7 @@
         h2 {
             color: #555;
         }
+        
         .logo {
             width: 150px; /* Adjust size as needed */
             height: auto;
@@ -60,17 +61,82 @@
 
     <nav>
         <a href="{{ url_for('home') }}">Home</a>
-        <a href="{{ url_for('walk_through') }}">Walk Through</a>
-        <a href="{{ url_for('demo') }}">Demo</a>
-        <a href="{{ url_for('student_demo') }}">Try It!</a>
+        <a href="{{ url_for('demo') }}">Data Base</a>
+        <a href="{{ url_for('algorithm') }}">Algorithm</a>
         <a href="{{ url_for('about') }}">About</a>
     </nav>
 
     <main>
         <img src="static/images/logo.png" alt="Logo" class="logo">
         <h1>Data Structures & Algorithms 2025</h1>
-        <h2>Matching Project</h2>
     </main>
+
+    <div class="text-section">
+        <h2>Welcome to our matching app!</h2>
+        <p>The goal? - Assign each student to their mandatory courses plus a fixed number of electives, maximizing overall utility.</p>
+        <img src="static/images/Structure.png" alt="Structure" class="structure-image">
+        <p>In this demo, you can see how the matching process works using ILP optimization. </p>
+    </div>
+
+    <div style="max-width:800px; margin: 0 auto; text-align: left; line-height:1.5;">
+        <section id="phase1" style="margin-bottom: 2em;">
+          <h2 style="margin-bottom: 0.5em;">Phase 1: Course Matching</h2>
+          <p style="margin-bottom: 1em;">This phase uses Integer Linear Programming to assign each student to their mandatory and elective courses, maximizing overall preference satisfaction.</p>
+          <ol style="padding-left: 1.5em; margin-bottom: 1.5em;">
+            <li style="margin-bottom: 0.75em;">
+              <strong>Decision Variables</strong><br>
+              For each student <code>s</code> and allowable course <code>c</code>, define a binary variable:<br>
+              <code>x<sub>s,c</sub> = 1</code> if student <code>s</code> takes course <code>c</code>, otherwise <code>0</code>.
+            </li>
+            <li style="margin-bottom: 0.75em;">
+              <strong>Objective Function</strong><br>
+              Maximize the total preference weight: each student–course preference rank (1–5) is converted to a weight <code>max(6 − rank, 1)</code>, and we maximize<br>
+              <code>∑<sub>s,c</sub> weight<sub>s,c</sub> · x<sub>s,c</sub></code>.
+            </li>
+            <li style="margin-bottom: 0.75em;">
+              <strong>Constraints</strong>
+              <ul style="padding-left: 1.5em; margin-top: 0.5em;">
+                <li style="margin-bottom: 0.5em;"><em>Mandatory Courses:</em> Force <code>x<sub>s,c</sub> = 1</code> for every required course <code>c</code> in the student’s program.</li>
+                <li style="margin-bottom: 0.5em;"><em>Elective Count:</em> Sum of elective-course variables for each student must equal the program’s required number of electives.</li>
+              </ul>
+            </li>
+            <li style="margin-bottom: 0.75em;">
+              <strong>Solving & Extraction</strong><br>
+              Uses the CBC solver to find the optimal assignment. Outputs a <code>course_assignments</code> mapping each <code>student_id</code> to their list of <code>course_id</code>s, plus statistics (status, objective value, total/average preference, solve time).
+            </li>
+          </ol>
+        </section>
+      
+        <section id="phase2" style="margin-bottom: 2em;">
+          <h2 style="margin-bottom: 0.5em;">Phase 2: Lab Time Matching</h2>
+          <p style="margin-bottom: 1em;">This phase assigns students to specific lab sections for the courses they have, again maximizing preference satisfaction while respecting capacity and avoiding schedule conflicts.</p>
+          <ol style="padding-left: 1.5em; margin-bottom: 1.5em;">
+            <li style="margin-bottom: 0.75em;">
+              <strong>Decision Variables</strong><br>
+              For each student <code>s</code>, course <code>c</code> with a lab, and lab section <code>l</code>, define:<br>
+              <code>x<sub>s,c,l</sub> = 1</code> if <code>s</code> is placed in section <code>l</code> of course <code>c</code>, otherwise <code>0</code>.
+            </li>
+            <li style="margin-bottom: 0.75em;">
+              <strong>Objective Function</strong><br>
+              Maximize summed lab-time preference weights: convert each student–time-slot rank (1–5) to <code>max(6 − rank, 1)</code> and maximize<br>
+              <code>∑ weight<sub>s,c,l</sub> · x<sub>s,c,l</sub></code>.
+            </li>
+            <li style="margin-bottom: 0.75em;">
+              <strong>Constraints</strong>
+              <ul style="padding-left: 1.5em; margin-top: 0.5em;">
+                <li style="margin-bottom: 0.5em;"><em>One Section per Lab:</em> Each student must be assigned exactly one section for each course that has a lab.</li>
+                <li style="margin-bottom: 0.5em;"><em>Capacity:</em> Each lab section can hold at most the specified <code>lab_capacity</code> students.</li>
+                <li style="margin-bottom: 0.5em;"><em>No Time Conflicts:</em> A student cannot be assigned two lab sections at the same time slot.</li>
+                <li style="margin-bottom: 0.5em;"><em>No Lecture-Lab Overlap:</em> Students cannot be placed in labs that conflict with their theory lecture times.</li>
+              </ul>
+            </li>
+            <li style="margin-bottom: 0.75em;">
+              <strong>Solving & Extraction</strong><br>
+              Solved via CBC. Produces a <code>time_assignments</code> mapping each <code>(student_id, course_id)</code> to either a selected <code>section_id</code> or <code>no_lab</code>, plus statistics (status, objective, total/average preference, solve time).
+            </li>
+          </ol>
+        </section>
+      </div>      
 
     <footer>
         <h3>Developers</h3>

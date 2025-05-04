@@ -1,29 +1,29 @@
 student_id,student_name,course_type,course_id,course_name
-2501,Elena Murray,Mandatory,1,Machine Learning
-2501,Elena Murray,Mandatory,2,Data structure and algorithm
-2501,Elena Murray,Elective,3,Deep learning
-2501,Elena Murray,Elective,4,Natural Language Processing
-2502,Dominik Allen,Mandatory,11,Statistics 2
-2502,Dominik Allen,Mandatory,12,International Diplomacy
-2502,Dominik Allen,Elective,14,Global Ethics
-2502,Dominik Allen,Elective,15,International Security
-2503,Corbin Cerny,Mandatory,6,Statistics 2
-2503,Corbin Cerny,Mandatory,7,Economics 2
-2503,Corbin Cerny,Elective,8,Global Ethics
-2503,Corbin Cerny,Elective,9,Development Economics
-2504,Juan Quinones,Mandatory,1,Machine Learning
-2504,Juan Quinones,Mandatory,2,Data structure and algorithm
-2504,Juan Quinones,Elective,4,Natural Language Processing
-2504,Juan Quinones,Elective,5,Law and Governance
-2505,Aditi Joshi,Mandatory,11,Statistics 2
-2505,Aditi Joshi,Mandatory,12,International Diplomacy
-2505,Aditi Joshi,Elective,13,UN Structure
-2505,Aditi Joshi,Elective,14,Global Ethics
-2506,Saurav Jha,Mandatory,6,Statistics 2
-2506,Saurav Jha,Mandatory,7,Economics 2
-2506,Saurav Jha,Elective,8,Global Ethics
-2506,Saurav Jha,Elective,10,Law and Governance
-2507,John Smith,Mandatory,1,Machine Learning
-2507,John Smith,Mandatory,2,Data structure and algorithm
-2507,John Smith,Elective,3,Deep learning
-2507,John Smith,Elective,5,Law and Governance
+2501,A,Mandatory,1,Machine Learning
+2501,A,Mandatory,2,Data structure and algorithm
+2501,A,Elective,3,Deep learning
+2501,A,Elective,4,Natural Language Processing
+2502,B,Mandatory,11,Statistics 2
+2502,B,Mandatory,12,International Diplomacy
+2502,B,Elective,14,Global Ethics
+2502,B,Elective,15,International Security
+2503,C,Mandatory,6,Statistics 2
+2503,C,Mandatory,7,Economics 2
+2503,C,Elective,8,Global Ethics
+2503,C,Elective,9,Development Economics
+2504,D,Mandatory,1,Machine Learning
+2504,D,Mandatory,2,Data structure and algorithm
+2504,D,Elective,4,Natural Language Processing
+2504,D,Elective,5,Law and Governance
+2505,E,Mandatory,11,Statistics 2
+2505,E,Mandatory,12,International Diplomacy
+2505,E,Elective,13,UN Structure
+2505,E,Elective,14,Global Ethics
+2506,F,Mandatory,6,Statistics 2
+2506,F,Mandatory,7,Economics 2
+2506,F,Elective,8,Global Ethics
+2506,F,Elective,10,Law and Governance
+2507,G,Mandatory,1,Machine Learning
+2507,G,Mandatory,2,Data structure and algorithm
+2507,G,Elective,3,Deep learning
+2507,G,Elective,5,Law and Governance

@@ -96,9 +96,8 @@
 
     <nav>
         <a href="{{ url_for('home') }}">Home</a>
-        <a href="{{ url_for('walk_through') }}">Walk Through</a>
-        <a href="{{ url_for('demo') }}">Demo</a>
-        <a href="{{ url_for('student_demo') }}">Try It!</a>
+        <a href="{{ url_for('demo') }}">Data Base</a>
+        <a href="{{ url_for('student_demo') }}">Algorithm</a>
         <a href="{{ url_for('about') }}">About</a>
     </nav>
     <form method="POST" action="{{ url_for('demo') }}">
@@ -119,32 +118,9 @@
             </select>
             
             <h4>Select Student's Preferences</h4>
-            <label for="pref1">Preference 1:</label>
+            <label for="pref1">Mandatory Course:</label>
+
             <select id="pref1" name="pref1">
-                <option value="pref1">Preference 1</option>
-                <option value="pref2">Preference 2</option>
-                <option value="pref3">Preference 3</option>
-                <option value="pref4">Preference 4</option>
-            </select>
-
-            <label for="pref2">Preference 2:</label>
-            <select id="pref2" name="pref2">
-                <option value="pref1">Preference 1</option>
-                <option value="pref2">Preference 2</option>
-                <option value="pref3">Preference 3</option>
-                <option value="pref4">Preference 4</option>
-            </select>
-
-            <label for="pref3">Preference 3:</label>
-            <select id="pref3" name="pref3">
-                <option value="pref1">Preference 1</option>
-                <option value="pref2">Preference 2</option>
-                <option value="pref3">Preference 3</option>
-                <option value="pref4">Preference 4</option>
-            </select>
-
-            <label for="pref4">Preference 4:</label>
-            <select id="pref4" name="pref4">
                 <option value="pref1">Preference 1</option>
                 <option value="pref2">Preference 2</option>
                 <option value="pref3">Preference 3</option>

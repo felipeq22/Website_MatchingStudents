@@ -65,10 +65,10 @@ from collections import defaultdict
 def load_data_first():
     """Load necessary CSV files for course matching."""
     # Load CSV files
-    course_data = pd.read_csv('course.csv')
-    student_data = pd.read_csv('student.csv')
-    elective_capacity_data = pd.read_csv('elective_capacity.csv')
-    elective_preference_data = pd.read_csv('elective_preference.csv')
+    course_data = pd.read_csv('backend/course.csv')
+    student_data = pd.read_csv('backend/student.csv')
+    elective_capacity_data = pd.read_csv('backend/elective_capacity.csv')
+    elective_preference_data = pd.read_csv('backend/elective_preference.csv')
     
     # Strip whitespace from column names
     course_data.columns = course_data.columns.str.strip()
@@ -280,11 +280,11 @@ def load_data_second():
     """
     # Load CSV files
     student_course_matching = pd.read_csv('student_course_matching.csv')
-    lab_time_data = pd.read_csv('lab_time.csv')
-    day_data = pd.read_csv('day.csv')
-    pre_lab_ele_man_data = pd.read_csv('pre_lab_ele_man.csv')
-    theory_time_data = pd.read_csv('theory_time.csv')
-    course_data = pd.read_csv('course.csv')
+    lab_time_data = pd.read_csv('backend/lab_time.csv')
+    day_data = pd.read_csv('backend/day.csv')
+    pre_lab_ele_man_data = pd.read_csv('backend/pre_lab_ele_man.csv')
+    theory_time_data = pd.read_csv('backend/theory_time.csv')
+    course_data = pd.read_csv('backend/course.csv')
     
     # Strip whitespace from column names and data
     for df in [student_course_matching, lab_time_data, day_data, 

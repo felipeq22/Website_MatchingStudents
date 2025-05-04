@@ -1,4 +1,4 @@
-student_id ,name ,program,program_id,required_electives
+student_id, name, program, program_id, required_electives
 2501,Elena Murray,MDS,1,2
 2502,Dominik Allen,MIA,3,2
 2503,Corbin Cerny,MPP,2,2

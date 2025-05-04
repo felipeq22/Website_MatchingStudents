@@ -8,17 +8,20 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            margin: 50px;
+            margin-top: 50px;
         }
         h1 {
             color: #333;
         }
         h2 {
             color: #555;
-            margin-top: 40px;
+        }
+        p {
+            margin: 10px 0;
+            color: #333;
         }
         .logo {
-            width: 150px;
+            width: 150px; 
             height: auto;
             margin-bottom: 20px;
         }
@@ -37,7 +40,40 @@
             border-radius: 5px;
         }
         main {
-            margin-top: 50px;
+           margin-top: 50px;
+        }
+        .text-section, .dropdown-section {
+            margin: 20px auto;
+            padding: 20px;
+            max-width: 600px;
+            text-align: center;
+            background-color: #f8f8f8;
+            border-radius: 10px;
+            box-shadow: 0px 2px 5px rgba(0,0,0,0.2);
+        }
+        label, select, textarea {
+            font-size: 1em;
+            margin: 5px 0;
+            padding: 8px;
+            width: 100%;
+            max-width: 100%;
+            margin-bottom: 10px;
+        }
+        select {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #ba0020;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #900015;
         }
         footer {
             margin-top: 50px;
@@ -54,46 +90,7 @@
             font-size: 1em;
             color: #555;
         }
-        .table-container {
-            margin: 30px auto;
-            width: 100%;
-            max-height: 400px;
-            overflow-x: auto;
-            overflow-y: auto;
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin: auto;
-            table-layout: fixed;
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 10px;
-            text-align: center;
-        }
-        th {
-            background-color: #ba0020;
-            color: white;
-        }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #ba0020;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 1em;
-            border-radius: 5px;
-        }
-        button:hover {
-            background-color: #90001a;
-        }
+
         a.button-link {
             display: inline-block;
             margin-top: 20px;
@@ -105,6 +102,39 @@
         }
         a.button-link:hover {
             background-color: #333;
+        }
+        .table-container {
+            margin: 30px auto;
+            width: 100%;
+            max-height: 400px;
+            overflow-x: auto;
+            overflow-y: auto;
+            text-align: center;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: auto;
+            table-layout: fixed;
+            text-align: center;
+        }
+        th, td {
+            padding: 10px 10px; /* 20px vertical, 10px horizontal */
+            height: 5px;        /* Optional: fixed minimum height */
+            text-align: center;
+            vertical-align: middle;
+            width: auto;         /* Allows fixed layout to distribute width evenly */
+            overflow: hidden;    /* Prevents overflow */
+            text-overflow: ellipsis; /* Adds "..." if content overflows */
+            white-space: nowrap;     /* Prevents line breaks */
+            text-align: center;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+            text-align: center;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
         }
         thead th {
             position: sticky;
@@ -134,12 +164,12 @@
     </nav>
 
     <div class="text-section">
-        <h1>Student Data Base</h1>
-        <label for="num_students">Consult Current Enrolled Students</label>
+        <h1>Algorithm</h1>
+        <label for="num_students">Run Algorithm for Enrolled Students</label>
         <br><br>
     </div>
 
-    <form method="POST" action="{{ url_for('demo') }}">
+    <form method="POST" action="{{ url_for('algorithm') }}">
         <button type="submit">Click Here</button>
     </form>
 
@@ -148,13 +178,9 @@
         <div class="table-container">
             {{ output|safe }}
         </div>
-    
-        <br>
-        <form method="GET" action="{{ url_for('student_demo') }}">
-            <button type="submit">Add New Student</button>
-        </form>
     {% endif %}
 
     <a class="button-link" href="{{ url_for('home') }}">Back</a>
+
 </body>
 </html>

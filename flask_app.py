@@ -7,15 +7,21 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import threading
 import webbrowser
-import algorithm
+import algorithm_f
 import pandas as pd 
 
 #Create a Flask app
 app = Flask(__name__)
 app.secret_key = 'your_unique_secret_key'
 
+#Hardcoded variables
 USERNAME = 'admin'
 PASSWORD = 'password123'
+PROGRAM_MAP = {
+    'MPP': 1,
+    'MDS': 2,
+    'MIA': 3
+}
 
 @app.route("/", methods = ['GET', 'POST'])
 @app.route('/login', methods = ['GET', 'POST'])
@@ -43,7 +49,6 @@ def home():
     else:
         return redirect(url_for('login'))
 
-
 @app.route('/student_demo')
 def student_demo():
     return render_template('student_demo.html')
@@ -55,21 +60,24 @@ def course_assignation():
 @app.route('/demo', methods = ['GET', 'POST'])
 def demo():
     output = None
+    courses_for_program = []
     if request.method == 'POST':
         try:
             df = pd.read_csv('backend/student.csv')
-            
             student_name = request.form.get('student_name')
             program = request.form.get('program')
             
             if student_name and program:
-                
+
+                program_id = PROGRAM_MAP.get(program)
+
                 last_id =df['student_id'].iloc[-1]
                 new_row = [last_id + 1, student_name , program, 1, 2]
                 new_df = pd.DataFrame([new_row], columns = df.columns)
                 df = pd.concat([df, new_df], ignore_index=True)
 
                 df.to_csv('backend/student.csv', index=False)
+
             
             output = df.to_html(classes='table table-bordered', index=False)
         except Exception as e:
@@ -77,20 +85,23 @@ def demo():
             
     return render_template('demo.html', output = output)
 
+@app.route('/algorithm', methods = ['GET', 'POST'])
+def algorithm():
+    output = None
+    if request.method == 'POST':
+        try:
+            df_algo = algorithm_f.optimize_course_matching()
+            df_algo2 = algorithm_f.optimize_lab_matching()
+            output = df_algo2.to_html(classes='table table-bordered', index=False)
+        except Exception as e:
+            output = f"<p style='color:red;'>Error: {str(e)}</p>"
+
+    return render_template('algorithm.html', output = output)
+
+
 @app.route('/about')
 def about():
     return render_template('about.html')
-
-@app.route('/walk_through')
-def walk_through():
-    return render_template('walk_through.html')
-    
-def about():
-    return render_template('about.html')
-
-#Function to open browser automatically
-def open_browser():
-    webbrowser.open_new("http://127.0.0.1:5000/")
 
 #Run Flask app in a separate thread
 def run_app():
