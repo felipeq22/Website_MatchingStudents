@@ -116,16 +116,20 @@
                 <option value="MDS">MDS</option>
                 <option value="MIA">MIA</option>
             </select>
-            
-            <h4>Select Student's Preferences</h4>
-            <label for="pref1">Mandatory Course:</label>
 
-            <select id="pref1" name="pref1">
-                <option value="pref1">Preference 1</option>
-                <option value="pref2">Preference 2</option>
-                <option value="pref3">Preference 3</option>
-                <option value="pref4">Preference 4</option>
-            </select>
+            <h4>Select Student's Preferences</h4>
+
+            <label for="pref1">Mandatory Course 1:</label>
+            <select id="pref1" name="pref1"></select>
+
+            <label for="pref2">Mandatory Course 2:</label>
+            <select id="pref2" name="pref2"></select>
+
+            <label for="pref3">Mandatory Course 3:</label>
+            <select id="pref3" name="pref3"></select>
+
+            <label for="pref4">Mandatory Course 4:</label>
+            <select id="pref4" name="pref4"></select>
 
             <br><br>
             <button type="submit">Submit</button>
@@ -139,6 +143,50 @@
         <h3>Developers</h3>
         <p>Elena Murray, Aditii Joshi, Dominik Allen, Corbin Cerny, Saurav Jha, Juan Quinones</p>
     </footer>
+
+</body>
+
+<footer>
+    <h3>Developers</h3>
+    <p>Elena Murray, Aditii Joshi, Dominik Allen, Corbin Cerny, Saurav Jha, Juan Quinones</p>
+</footer>
+
+<!-- ✅ INSERT THE SCRIPT HERE -->
+<script>
+    const programDropdown = document.getElementById('program');
+    const prefDropdowns = [
+        document.getElementById('pref1'),
+        document.getElementById('pref2'),
+        document.getElementById('pref3'),
+        document.getElementById('pref4')
+    ];
+
+    const programOptions = {
+        "MPP": ["Law and Governance", "Statistics 2", "Economics 2", "Global Ethics", "Development Economics"],
+        "MDS": ["Machine Learning", "Data structure and algorithm", "Deep learning", "Natural Language Processing", "Law and Governance"],
+        "MIA": ["Law and Governance", "Statistics 2", "International Diplomacy", "UN Structure", "Global Ethics", "International Security"]
+    };
+
+    function updatePreferences() {
+        const selectedProgram = programDropdown.value;
+        const courses = programOptions[selectedProgram];
+
+        // Fill each dropdown with the same course list
+        prefDropdowns.forEach(dropdown => {
+            dropdown.innerHTML = '';  // Clear old options
+
+            courses.forEach(course => {
+                const option = document.createElement('option');
+                option.value = course;
+                option.textContent = course;
+                dropdown.appendChild(option);
+            });
+        });
+    }
+
+    programDropdown.addEventListener('change', updatePreferences);
+    window.addEventListener('DOMContentLoaded', updatePreferences);
+</script>
 
 </body>
 </html>

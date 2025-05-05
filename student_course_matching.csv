@@ -27,3 +27,11 @@ student_id,student_name,course_type,course_id,course_name
 2507,John Smith,Mandatory,2,Data structure and algorithm
 2507,John Smith,Elective,3,Deep learning
 2507,John Smith,Elective,5,Law and Governance
+2508,Simon Munzert,Mandatory,1,Machine Learning
+2508,Simon Munzert,Mandatory,2,Data structure and algorithm
+2508,Simon Munzert,Elective,3,Deep learning
+2508,Simon Munzert,Elective,5,Law and Governance
+2509,Juan Quinones,Mandatory,1,Machine Learning
+2509,Juan Quinones,Mandatory,2,Data structure and algorithm
+2509,Juan Quinones,Elective,3,Deep learning
+2509,Juan Quinones,Elective,5,Law and Governance

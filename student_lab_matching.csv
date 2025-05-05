@@ -27,3 +27,11 @@ student_id,student_name,course_id,course_name,course_type,theory_day,theory_star
 2507,John Smith,2,Data structure and algorithm,Mandatory,Tuesday,16:00:00,18:00:00,Thursday,16:00:00,18:00:00
 2507,John Smith,3,Deep learning,Elective,Tuesday,12:00:00,14:00:00,Friday,08:00:00,10:00:00
 2507,John Smith,5,Law and Governance,Elective,Monday,14:00:00,16:00:00,N/A,N/A,N/A
+2508,Simon Munzert,1,Machine Learning,Mandatory,Monday,08:00:00,10:00:00,Wednesday,10:00:00,12:00:00
+2508,Simon Munzert,2,Data structure and algorithm,Mandatory,Tuesday,16:00:00,18:00:00,Wednesday,16:00:00,18:00:00
+2508,Simon Munzert,3,Deep learning,Elective,Tuesday,12:00:00,14:00:00,Tuesday,16:00:00,18:00:00
+2508,Simon Munzert,5,Law and Governance,Elective,Monday,14:00:00,16:00:00,N/A,N/A,N/A
+2509,Juan Quinones,1,Machine Learning,Mandatory,Monday,08:00:00,10:00:00,Wednesday,10:00:00,12:00:00
+2509,Juan Quinones,2,Data structure and algorithm,Mandatory,Tuesday,16:00:00,18:00:00,Wednesday,16:00:00,18:00:00
+2509,Juan Quinones,3,Deep learning,Elective,Tuesday,12:00:00,14:00:00,Tuesday,16:00:00,18:00:00
+2509,Juan Quinones,5,Law and Governance,Elective,Monday,14:00:00,16:00:00,N/A,N/A,N/A

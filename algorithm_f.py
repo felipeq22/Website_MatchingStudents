@@ -299,6 +299,7 @@ def load_data_second():
     return (student_course_matching, lab_time_data, day_mapping, 
             pre_lab_ele_man_data, theory_time_data, course_data)
 
+
 def check_time_conflict(day1, start1, end1, day2, start2, end2):
     """
     Check if two time slots conflict with each other.
