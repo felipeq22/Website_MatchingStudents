@@ -218,10 +218,31 @@
       <img src="static/images/Solution3.png" alt="Solution3" class="Solution3-image">
     </div>
 
-    <div class="text-section">
-        <p>Several tests are run to confirm the efficiency of the algorithm, demonstrated below:</p>
-        <img src="static/images/Algorithm_Test.png" alt="Algorithm_Test" class="algorithm_test-image">
-    </div>
+    <div class="text-section" style="max-width: 800px; margin: 0 auto; text-align: justify; line-height: 1.6; margin-top: 2em;">
+      <h2 style="text-align: left;">Testing & Validation</h2>
+    
+      <p>
+        Several tests were conducted to confirm the efficiency and correctness of the algorithm, as demonstrated in the figure below:
+      </p>
+    
+      <img src="{{ url_for('static', filename='images/Algorithm_Test.png') }}" alt="Algorithm Test Results" class="algorithm_test-image" style="max-width: 100%; height: auto; display: block; margin: 1em auto;">
+    
+      <p>
+        We used Python’s <code>unittest</code> framework to verify key aspects of the matching algorithm. The tests confirmed that:
+      </p>
+    
+      <ul style="padding-left: 1.5em; margin-bottom: 1em;">
+        <li>Students are always assigned their mandatory courses.</li>
+        <li>The number of electives assigned matches each student's requirement.</li>
+        <li>Course capacities are never exceeded.</li>
+        <li>Time conflict detection correctly prevents overlapping course or lab assignments.</li>
+        <li>The output file structure matches expected formats and contents.</li>
+      </ul>
+    
+      <p>
+        These validations help ensure the model is both robust and scalable.
+      </p>
+    </div>    
 
     <footer>
         <h3>Developers</h3>
