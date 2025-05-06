@@ -138,77 +138,73 @@
         </section>
       </div>      
 
-        <h3>Nature of Function</h3>
+      <section id="function-analysis" style="max-width: 800px; margin: 0 auto; text-align: justify; line-height: 1.6; margin-bottom: 2em;">
+        <h2 style="text-align: left;">Function and Complexity Analysis</h2>
+      
+        <h3 style="text-align: left;">Nature of Function</h3>
         <p>
           The utility function (which computes aggregate utility) is linear. When combined with the constraints, it defines an optimization problem over a polyhedron. However, due to the integer constraints, the feasible region consists of discrete points within this polyhedron rather than the entire region itself.
         </p>
       
-        <h3>Space Complexity</h3>
+        <h3 style="text-align: left;">Space Complexity</h3>
         <p>The primary contributors to space complexity include the following:</p>
         <ul style="padding-left: 1.5em;">
           <li>
-            <strong>Input Storage (O(n)):</strong><br>
-            Memory required to store input data from CSV files—such as course details, student information, elective capacities, and preference data.
+            <strong>Input Storage (O(n)):</strong> Memory required to store input data from CSV files—such as course details, student information, elective capacities, and preference data.
           </li>
           <li>
-            <strong>Decision Variables (O(s × c)):</strong><br>
-            Binary variables <code>X[s, c]</code> representing student-course assignments:
+            <strong>Decision Variables (O(s × c)):</strong> Binary variables <code>X[s, c]</code> representing student-course assignments:
             <ul>
               <li><code>1</code> if student <code>s</code> is assigned to course <code>c</code></li>
               <li><code>0</code> otherwise</li>
             </ul>
-            Requires one variable per student-course combination. <br>
-            <code>s</code> = number of students, <code>c</code> = number of courses
+            Requires one variable per student-course combination.
+            <br><code>s</code> = number of students, <code>c</code> = number of courses
           </li>
           <li>
-            <strong>Constraint Matrix (O(k × s × c)):</strong><br>
-            Represents all model constraints:
+            <strong>Constraint Matrix (O(k × s × c)):</strong> Represents all model constraints:
             <ul>
               <li>Each row = one constraint</li>
               <li>Each column = one decision variable</li>
               <li>Non-zero entries = variable involvement and coefficients</li>
             </ul>
-            In the worst case, each variable may appear in <code>k</code> constraints.<br>
+            In the worst case, each variable may appear in <code>k</code> constraints.
             Typically implemented as a sparse matrix for efficiency.
           </li>
           <li>
-            <strong>Utility Function Storage (O(p)):</strong><br>
-            <code>p</code> is the number of student-course preference entries.
+            <strong>Utility Function Storage (O(p)):</strong> <code>p</code> is the number of student-course preference entries.
           </li>
         </ul>
         <p><strong>Total space complexity:</strong> <code>O(n) + O(s × c) + O(k × s × c) + O(p)</code></p>
       
-        <h3>Time Complexity</h3>
+        <h3 style="text-align: left;">Time Complexity</h3>
         <ul style="padding-left: 1.5em;">
-          <li>
-            <strong>Utility Function Construction (O(p)):</strong><br>
-            One iteration through all preference entries.
-          </li>
-          <li>
-            <strong>Objective Addition to Model (O(p)):</strong><br>
-            Same order as the number of preferences.
-          </li>
-          <li>
-            <strong>Worst-case Solve Time: O(2<sup>s×c</sup>)</strong><br>
+          <li><strong>Utility Function Construction (O(p)):</strong> One iteration through all preference entries.</li>
+          <li><strong>Objective Addition to Model (O(p)):</strong> Same order as the number of preferences.</li>
+          <li><strong>Worst-case Solve Time: O(2<sup>s×c</sup>)</strong><br>
             Reflects the exponential number of possible binary variable combinations.
           </li>
           <li>
-            <strong>Practical Time Complexity:</strong><br>
-            Greatly reduced due to solver optimizations like:
+            <strong>Practical Time Complexity:</strong> Greatly reduced due to solver optimizations like:
             <ul>
               <li>Branch-and-bound: Efficient search space pruning</li>
               <li>LP relaxation: Solves continuous version first</li>
-              <li>Cutting planes: Adds constraints to improve tightness</li>
+              <li>Cutting planes: Adds constraints to tighten the feasible region</li>
             </ul>
           </li>
         </ul>
       
-        <h3>Solution Method</h3>
+        <h3 style="text-align: left;">Solution Method</h3>
         <p>
-          The problem is solved using the <strong>Pulp</strong> library, which combines Branch and Bound, LP Relaxation, and Cutting Planes methods to efficiently navigate the solution space.
+          The problem is solved using the <strong>Pulp</strong> library, which combines Branch and Bound, LP Relaxation, and Cutting Planes to efficiently navigate the solution space.
         </p>
-
+      </section>
+      
       <div class="text-section">
+          <img src="static/images/Solution1.png" alt="Solution1" class="Solution1-image">
+      </div>
+
+    <div class="text-section">
         <p>Several tests are run to confirm the efficiency of the algorithm, demonstrated below:</p>
         <img src="static/images/Algorithm_Test.png" alt="Algorithm_Test" class="algorithm_test-image">
     </div>
