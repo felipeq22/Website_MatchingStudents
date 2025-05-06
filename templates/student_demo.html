@@ -125,11 +125,14 @@
             <label for="pref2">Mandatory Course 2:</label>
             <select id="pref2" name="pref2"></select>
 
-            <label for="pref3">Mandatory Course 3:</label>
+            <label for="pref3">Elective Course 1:</label>
             <select id="pref3" name="pref3"></select>
 
-            <label for="pref4">Mandatory Course 4:</label>
+            <label for="pref4">Elective Course 2:</label>
             <select id="pref4" name="pref4"></select>
+
+            <label for="pref5">Elective Course 3:</label>
+            <select id="pref5" name="pref5"></select>
 
             <br><br>
             <button type="submit">Submit</button>
@@ -154,28 +157,49 @@
 <!-- ✅ INSERT THE SCRIPT HERE -->
 <script>
     const programDropdown = document.getElementById('program');
-    const prefDropdowns = [
+    const mandatoryPrefDropdowns = [
         document.getElementById('pref1'),
-        document.getElementById('pref2'),
+        document.getElementById('pref2')
+    ];
+
+    const electivePrefDropdowns = [
         document.getElementById('pref3'),
-        document.getElementById('pref4')
+        document.getElementById('pref4'),
+        document.getElementById('pref5')
     ];
 
     const programOptions = {
-        "MPP": ["Law and Governance", "Statistics 2", "Economics 2", "Global Ethics", "Development Economics"],
-        "MDS": ["Machine Learning", "Data structure and algorithm", "Deep learning", "Natural Language Processing", "Law and Governance"],
-        "MIA": ["Law and Governance", "Statistics 2", "International Diplomacy", "UN Structure", "Global Ethics", "International Security"]
+        "MPP": ["Statistics 2", "Economics 2"],
+        "MDS": ["Machine Learning", "Data structure and algorithm"],
+        "MIA": ["Statistics 2", "International Diplomacy"]
+    };
+
+    const programOptions2 = {
+        "MPP": ["Law and Governance", "Global Ethics", "Development Economics"],
+        "MDS": ["Deep learning", "Natural Language Processing", "Law and Governance"],
+        "MIA": ["UN Structure", "Global Ethics", "International Security"]
     };
 
     function updatePreferences() {
         const selectedProgram = programDropdown.value;
-        const courses = programOptions[selectedProgram];
+        const mandatoryCourses = programOptions[selectedProgram];
+        const electiveCourses = programOptions2[selectedProgram];
 
-        // Fill each dropdown with the same course list
-        prefDropdowns.forEach(dropdown => {
+        // Fill mandatory dropdowns with mandatory courses (programOptions)
+        mandatoryPrefDropdowns.forEach(dropdown => {
             dropdown.innerHTML = '';  // Clear old options
+            mandatoryCourses.forEach(course => {
+                const option = document.createElement('option');
+                option.value = course;
+                option.textContent = course;
+                dropdown.appendChild(option);
+            });
+        });
 
-            courses.forEach(course => {
+        // Fill elective dropdowns with elective courses (programOptions2)
+        electivePrefDropdowns.forEach(dropdown => {
+            dropdown.innerHTML = '';  // Clear old options
+            electiveCourses.forEach(course => {
                 const option = document.createElement('option');
                 option.value = course;
                 option.textContent = course;

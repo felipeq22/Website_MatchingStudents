@@ -23,7 +23,3 @@ student_id,student_name,course_type,course_id,course_name
 2506,F,Mandatory,7,Economics 2
 2506,F,Elective,8,Global Ethics
 2506,F,Elective,10,Law and Governance
-2507,G,Mandatory,1,Machine Learning
-2507,G,Mandatory,2,Data structure and algorithm
-2507,G,Elective,3,Deep learning
-2507,G,Elective,5,Law and Governance
