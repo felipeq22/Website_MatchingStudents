@@ -59,6 +59,15 @@
             height: auto;
             display: block;
             margin: 0 auto;
+        }
+        .solution-image {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1em auto;
+            border: 2px solid #ccc;       /* light gray border */
+            border-radius: 8px;           /* optional: rounded corners */
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* optional: soft shadow */
       }
 
     </style>
@@ -207,15 +216,15 @@
       </section>
       
     <div class="text-section">
-        <img src="static/images/Solution1.png" alt="Solution1" class="Solution1-image">
+      <img src="{{ url_for('static', filename='images/Solution1.png') }}" alt="Solution1" class="solution-image">
     </div>
-
+      
     <div class="text-section">
-      <img src="static/images/Solution2.png" alt="Solution2" class="Solution2-image">
+      <img src="{{ url_for('static', filename='images/Solution2.png') }}" alt="Solution2" class="solution-image">
     </div>
-
+      
     <div class="text-section">
-      <img src="static/images/Solution3.png" alt="Solution3" class="Solution3-image">
+      <img src="{{ url_for('static', filename='images/Solution3.png') }}" alt="Solution3" class="solution-image">
     </div>
 
     <div class="text-section" style="max-width: 800px; margin: 0 auto; text-align: justify; line-height: 1.6; margin-top: 2em;">
