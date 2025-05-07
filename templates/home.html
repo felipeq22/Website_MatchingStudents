@@ -215,16 +215,27 @@
         </p>
       </section>
       
-    <div class="text-section">
-      <img src="{{ url_for('static', filename='images/Solution1.png') }}" alt="Solution1" class="solution-image">
+    <div class="text-section" style="max-width: 800px; margin: 0 auto; text-align: justify; line-height: 1.6;">
+      <h3 style="text-align: left;">Demonstration of cutting plane and branching</h3>
+      <figure style="text-align: center;">
+        <img src="{{ url_for('static', filename='images/Solution1.png') }}" alt="Solution1" class="solution-image">
+        <figcaption style="margin-top: 0.5em; font-style: italic; color: #555;">Figure 1:  Cutting planes are additional constraints that don't remove any integer solutions.</figcaption>
+      </figure>
     </div>
       
     <div class="text-section">
-      <img src="{{ url_for('static', filename='images/Solution2.png') }}" alt="Solution2" class="solution-image">
+      <figure style="text-align: center;">
+        <img src="{{ url_for('static', filename='images/Solution2.png') }}" alt="Solution2" class="solution-image">
+        <figcaption style="margin-top: 0.5em; font-style: italic; color: #555;">Figure 2: They "cut off" portions of the feasible region that contain only fractional solutions. 
+        </figcaption>
+      </figure>
     </div>
       
     <div class="text-section">
-      <img src="{{ url_for('static', filename='images/Solution3.png') }}" alt="Solution3" class="solution-image">
+      <figure style="text-align: center;">
+        <img src="{{ url_for('static', filename='images/Solution3.png') }}" alt="Solution3" class="solution-image">
+        <figcaption style="margin-top: 0.5em; font-style: italic; color: #555;">Figure 3: This cutting plane (x + y ≤ 6) eliminates some fractional solutions while keeping all integer points.</figcaption>
+      </figure>
     </div>
 
     <div class="text-section" style="max-width: 800px; margin: 0 auto; text-align: justify; line-height: 1.6; margin-top: 2em;">
