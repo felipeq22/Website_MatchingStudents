@@ -86,183 +86,21 @@
         <h1>Data Structures & Algorithms 2025</h1>
     </main>
 
-    <div class="text-section">
-        <h2>Welcome to our matching app!</h2>
-        <p>The goal? - Assign each student to their mandatory courses plus a fixed number of electives, maximizing overall utility.</p>
-        <img src="static/images/Structure.png" alt="Structure" class="structure-image">
-        <p>In this demo, you can see how the matching process works using ILP optimization. </p>
-    </div>
-
-    <div style="max-width:800px; margin: 0 auto; text-align: left; line-height:1.5;">
-        <section id="phase1" style="margin-bottom: 2em;">
-          <h2 style="margin-bottom: 0.5em;">Phase 1: Course Matching</h2>
-          <p style="margin-bottom: 1em;">This phase uses Integer Linear Programming to assign each student to their mandatory and elective courses, maximizing overall preference satisfaction.</p>
-          <ol style="padding-left: 1.5em; margin-bottom: 1.5em;">
-            <li style="margin-bottom: 0.75em;">
-              <strong>Decision Variables</strong><br>
-              For each student <code>s</code> and allowable course <code>c</code>, define a binary variable:<br>
-              <code>x<sub>s,c</sub> = 1</code> if student <code>s</code> takes course <code>c</code>, otherwise <code>0</code>.
-            </li>
-            <li style="margin-bottom: 0.75em;">
-              <strong>Objective Function</strong><br>
-              Maximize the total preference weight: each student–course preference rank (1–5) is converted to a weight <code>max(6 − rank, 1)</code>, and we maximize<br>
-              <code>∑<sub>s,c</sub> weight<sub>s,c</sub> · x<sub>s,c</sub></code>.
-            </li>
-            <li style="margin-bottom: 0.75em;">
-              <strong>Constraints</strong>
-              <ul style="padding-left: 1.5em; margin-top: 0.5em;">
-                <li style="margin-bottom: 0.5em;"><em>Mandatory Courses:</em> Force <code>x<sub>s,c</sub> = 1</code> for every required course <code>c</code> in the student’s program.</li>
-                <li style="margin-bottom: 0.5em;"><em>Elective Count:</em> Sum of elective-course variables for each student must equal the program’s required number of electives.</li>
-              </ul>
-            </li>
-            <li style="margin-bottom: 0.75em;">
-              <strong>Solving & Extraction</strong><br>
-              Uses the CBC solver to find the optimal assignment. Outputs a <code>course_assignments</code> mapping each <code>student_id</code> to their list of <code>course_id</code>s, plus statistics (status, objective value, total/average preference, solve time).
-            </li>
-          </ol>
-        </section>
-      
-        <section id="phase2" style="margin-bottom: 2em;">
-          <h2 style="margin-bottom: 0.5em;">Phase 2: Lab Time Matching</h2>
-          <p style="margin-bottom: 1em;">This phase assigns students to specific lab sections for the courses they have, again maximizing preference satisfaction while respecting capacity and avoiding schedule conflicts.</p>
-          <ol style="padding-left: 1.5em; margin-bottom: 1.5em;">
-            <li style="margin-bottom: 0.75em;">
-              <strong>Decision Variables</strong><br>
-              For each student <code>s</code>, course <code>c</code> with a lab, and lab section <code>l</code>, define:<br>
-              <code>x<sub>s,c,l</sub> = 1</code> if <code>s</code> is placed in section <code>l</code> of course <code>c</code>, otherwise <code>0</code>.
-            </li>
-            <li style="margin-bottom: 0.75em;">
-              <strong>Objective Function</strong><br>
-              Maximize summed lab-time preference weights: convert each student–time-slot rank (1–5) to <code>max(6 − rank, 1)</code> and maximize<br>
-              <code>∑ weight<sub>s,c,l</sub> · x<sub>s,c,l</sub></code>.
-            </li>
-            <li style="margin-bottom: 0.75em;">
-              <strong>Constraints</strong>
-              <ul style="padding-left: 1.5em; margin-top: 0.5em;">
-                <li style="margin-bottom: 0.5em;"><em>One Section per Lab:</em> Each student must be assigned exactly one section for each course that has a lab.</li>
-                <li style="margin-bottom: 0.5em;"><em>Capacity:</em> Each lab section can hold at most the specified <code>lab_capacity</code> students.</li>
-                <li style="margin-bottom: 0.5em;"><em>No Time Conflicts:</em> A student cannot be assigned two lab sections at the same time slot.</li>
-                <li style="margin-bottom: 0.5em;"><em>No Lecture-Lab Overlap:</em> Students cannot be placed in labs that conflict with their theory lecture times.</li>
-              </ul>
-            </li>
-            <li style="margin-bottom: 0.75em;">
-              <strong>Solving & Extraction</strong><br>
-              Solved via CBC. Produces a <code>time_assignments</code> mapping each <code>(student_id, course_id)</code> to either a selected <code>section_id</code> or <code>no_lab</code>, plus statistics (status, objective, total/average preference, solve time).
-            </li>
-          </ol>
-        </section>
-      </div>      
-
-      <section id="function-analysis" style="max-width: 800px; margin: 0 auto; text-align: justify; line-height: 1.6; margin-bottom: 2em;">
-        <h2 style="text-align: left;">Function and Complexity Analysis</h2>
-      
-        <h3 style="text-align: left;">Nature of Function</h3>
-        <p>
-          The utility function (which computes aggregate utility) is linear. When combined with the constraints, it defines an optimization problem over a polyhedron. However, due to the integer constraints, the feasible region consists of discrete points within this polyhedron rather than the entire region itself.
-        </p>
-      
-        <h3 style="text-align: left;">Space Complexity</h3>
-        <p>The primary contributors to space complexity include the following:</p>
-        <ul style="padding-left: 1.5em;">
-          <li>
-            <strong>Input Storage (O(n)):</strong> Memory required to store input data from CSV files—such as course details, student information, elective capacities, and preference data.
-          </li>
-          <li>
-            <strong>Decision Variables (O(s × c)):</strong> Binary variables <code>X[s, c]</code> representing student-course assignments:
-            <ul>
-              <li><code>1</code> if student <code>s</code> is assigned to course <code>c</code></li>
-              <li><code>0</code> otherwise</li>
-            </ul>
-            Requires one variable per student-course combination.
-            <br><code>s</code> = number of students, <code>c</code> = number of courses
-          </li>
-          <li>
-            <strong>Constraint Matrix (O(k × s × c)):</strong> Represents all model constraints:
-            <ul>
-              <li>Each row = one constraint</li>
-              <li>Each column = one decision variable</li>
-              <li>Non-zero entries = variable involvement and coefficients</li>
-            </ul>
-            In the worst case, each variable may appear in <code>k</code> constraints.
-            Typically implemented as a sparse matrix for efficiency.
-          </li>
-          <li>
-            <strong>Utility Function Storage (O(p)):</strong> <code>p</code> is the number of student-course preference entries.
-          </li>
-        </ul>
-        <p><strong>Total space complexity:</strong> <code>O(n) + O(s × c) + O(k × s × c) + O(p)</code></p>
-      
-        <h3 style="text-align: left;">Time Complexity</h3>
-        <ul style="padding-left: 1.5em;">
-          <li><strong>Utility Function Construction (O(p)):</strong> One iteration through all preference entries.</li>
-          <li><strong>Objective Addition to Model (O(p)):</strong> Same order as the number of preferences.</li>
-          <li><strong>Worst-case Solve Time: O(2<sup>s×c</sup>)</strong><br>
-            Reflects the exponential number of possible binary variable combinations.
-          </li>
-          <li>
-            <strong>Practical Time Complexity:</strong> Greatly reduced due to solver optimizations like:
-            <ul>
-              <li>Branch-and-bound: Efficient search space pruning</li>
-              <li>LP relaxation: Solves continuous version first</li>
-              <li>Cutting planes: Adds constraints to tighten the feasible region</li>
-            </ul>
-          </li>
-        </ul>
-      
-        <h3 style="text-align: left;">Solution Method</h3>
-        <p>
-          The problem is solved using the <strong>Pulp</strong> library, which combines Branch and Bound, LP Relaxation, and Cutting Planes to efficiently navigate the solution space.
-        </p>
-      </section>
-      
-    <div class="text-section" style="max-width: 800px; margin: 0 auto; text-align: justify; line-height: 1.6;">
-      <h3 style="text-align: left;">Demonstration of cutting plane and branching</h3>
-      <figure style="text-align: center;">
-        <img src="{{ url_for('static', filename='images/Solution1.png') }}" alt="Solution1" class="solution-image">
-        <figcaption style="margin-top: 0.5em; font-style: italic; color: #555;">Figure 1:  Cutting planes are additional constraints that don't remove any integer solutions.</figcaption>
-      </figure>
-    </div>
-      
-    <div class="text-section">
-      <figure style="text-align: center;">
-        <img src="{{ url_for('static', filename='images/Solution2.png') }}" alt="Solution2" class="solution-image">
-        <figcaption style="margin-top: 0.5em; font-style: italic; color: #555;">Figure 2: They "cut off" portions of the feasible region that contain only fractional solutions. 
-        </figcaption>
-      </figure>
-    </div>
-      
-    <div class="text-section">
-      <figure style="text-align: center;">
-        <img src="{{ url_for('static', filename='images/Solution3.png') }}" alt="Solution3" class="solution-image">
-        <figcaption style="margin-top: 0.5em; font-style: italic; color: #555;">Figure 3: This cutting plane (x + y ≤ 6) eliminates some fractional solutions while keeping all integer points.</figcaption>
-      </figure>
-    </div>
-
-    <div class="text-section" style="max-width: 800px; margin: 0 auto; text-align: justify; line-height: 1.6; margin-top: 2em;">
-      <h2 style="text-align: left;">Testing & Validation</h2>
-    
-      <p>
-        Several tests were conducted to confirm the efficiency and correctness of the algorithm, as demonstrated in the figure below:
-      </p>
-    
-      <img src="{{ url_for('static', filename='images/Algorithm_Test.png') }}" alt="Algorithm Test Results" class="algorithm_test-image" style="max-width: 100%; height: auto; display: block; margin: 1em auto;">
-    
-      <p>
-        We used Python’s <code>unittest</code> framework to verify key aspects of the matching algorithm. The tests confirmed that:
-      </p>
-    
-      <ul style="padding-left: 1.5em; margin-bottom: 1em;">
-        <li>Students are always assigned their mandatory courses.</li>
-        <li>The number of electives assigned matches each student's requirement.</li>
-        <li>Course capacities are never exceeded.</li>
-        <li>Time conflict detection correctly prevents overlapping course or lab assignments.</li>
-        <li>The output file structure matches expected formats and contents.</li>
-      </ul>
-    
-      <p>
-        These validations help ensure the model is both robust and scalable.
-      </p>
-    </div>    
+    <main>
+      <h2>Welcome to our class timetable matching app!</h2>
+      <p>The goal? Assign each student to their mandatory courses plus a fixed number of electives, maximizing overall utility.</p><br>
+  
+      <h2>How to navigate this website?</h2>
+      <div style="text-align: left; max-width: 700px; margin: 0 auto; font-size: 1.1em; line-height: 1.6;">
+          <p>📘 <strong>Step 1:</strong> Go to the <strong>Data Base</strong> tab to view a sample of enrolled students, and try adding yourself as a new student to the data base by selecting your course details and elective preferences.</p>
+  
+          <p>🧮 <strong>Step 2:</strong> Go to the <strong>Algorithm</strong> tab, and click to run the class matching algorithm. Once the results have been generated, scroll down to see your newly generated class timetable!</p>
+  
+          <p>📖 <strong>Step 3:</strong> Go to the <strong>About</strong> page, and read more about the backend setup of the algorithm and how it works.</p>
+      </div>
+  
+      <p style="margin-top: 2em; font-weight: bold;">We hope you enjoy testing our class matching algorithm! 🎓</p>
+  </main>
 
     <footer>
         <h3>Developers</h3>
